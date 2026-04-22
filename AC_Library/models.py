@@ -11,20 +11,28 @@ class Student(models.Model): # Student model to store student information.
     def clean(self): # Clean function to validate the data before saving it to the database.
         # Checks for any empty fields.
         if not self.first_name or not self.last_name or not self.school_email: # Checks if any of the fields are empty.
-            raise ValidationError("All fields must be provided and cannot be empty.") # Error message.
+            raise ValidationError({ # Raises error message for empty fields.
+                'first_name': "First name is required.", # Error message for first name.
+                'last_name': "Last name is required.", # Error message for last name.
+                'school_email': "School email is required." # Error message for school email.
+            })
         # Validates first and last name.
-        if not self.first_name.isalpha(): # Checks if the first name contains only letters (alphabet).
-            raise ValidationError("First name can only contain letters.") # Error message.
-        if len(self.first_name) < 3: # Checks if the first name is less than 3 characters long.
-            raise ValidationError("First name must be at least 3 characters.") # Error message.
-        if not self.last_name.isalpha(): # Checks if the last name contains only letters (alphabet).
-            raise ValidationError("Last name can only contain letters.") # Error message.
-        if len(self.last_name) < 3: # Checks if the last name is less than 3 characters long.
-            raise ValidationError("Last name must be at least 3 characters.") # Error message.
+        if not self.first_name.isalpha() or not self.last_name.isalpha(): # Checks if the first or last name contains only letters (alphabet).
+            raise ValidationError({
+                'first_name': "First name can only contain letters.", # Error message for first name.
+                'last_name': "Last name can only contain letters." # Error message for last name.
+            }) 
+        if len(self.first_name) < 3 or len(self.last_name) < 3: # Checks if the first or last name is less than 3 characters long.
+            raise ValidationError({
+                'first_name': "First and last names must be at least 3 characters.", # Error message for first name.
+                'last_name': "First and last names must be at least 3 characters." # Error message for last name.
+            }) 
         # Validate email by making sure it ends with the correct domain.
         if not self.school_email.endswith("@ac.school.nz"): # Checks if the school email ends with "@ac.school.nz".
-            raise ValidationError("School email must end with '@ac.school.nz'") # Error message.
-            
+            raise ValidationError({
+                'school_email': "School email must end with '@ac.school.nz'" # Error message for school email.
+            })
+
     def __str__(self): # Returns the full name of students when data is validated and saved.
         return f"{self.first_name} {self.last_name}" # The printed message is [first name last name].
     
@@ -53,8 +61,12 @@ class Issue(models.Model): # Issue model to store information about book issues.
     overdue_date = models.DateField(null=True, blank=True) # Stores the date when a book is overdue.
 
     def clean(self): # Clean function to validate the data before saving it to the database.
-        if self.issue_date > self.overdue_date: # Checks if the issue date is after the overdue date.
+        if self.issued_book.book_copies == 0: # Checks if there are no copies of the book available to issue.
+            raise ValidationError("No copies of the book are available to issue.") # Error message.
+        if self.overdue_date and self.issue_date > self.overdue_date: # Checks if the issue date is after the overdue date.
             raise ValidationError("Issue date cannot be after the overdue date.") # Error message.
+        if self.issued_book.book_copies > 0: # If there are copies of the book available to issue, decrease the number of copies by 1.
+            self.issued_book.book_copies -= 1 # Decrease the number of book copies by 1 when a book is issued.
 
     def __str__(self): # Returns the student, issued book, and issue date when data is validated and saved.
         # The printed message is [student] issued [issued book] on [issue date].
@@ -68,11 +80,13 @@ class Return(models.Model): # Return model to store information about book retur
     def clean(self): # Clean function to validate the data before saving it to the database.
         if self.return_date < self.issue_id.issue_date: # Checks if the return date is before the issue date.
             raise ValidationError("Return date cannot be before the issue date.") # Error message.
+        if self.issue_id.issued_book: 
+            self.issue_id.issued_book.book_copies += 1 # Increase the number of book copies by 1 when a book is returned.
         # To be fixed:
         # if self.return_date > self.issue_id.overdue_date: # Checks if the return date is after the overdue date.
         #     raise ValidationError("Return date cannot be after the overdue date.") # Error message.
         
     def __str__(self): # Returns the student, returned book, and return date when data is validated and saved.
         # The printed message is [student] returned [returned book] on [return date].
-        return f"{self.student} returned {self.returned_book} on {self.return_date}"
+        return f"{self.issue_id.student} returned {self.issue_id.issued_book} on {self.return_date}"
     
