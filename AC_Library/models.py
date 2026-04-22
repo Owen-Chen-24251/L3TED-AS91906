@@ -80,12 +80,11 @@ class Return(models.Model): # Return model to store information about book retur
     def clean(self): # Clean function to validate the data before saving it to the database.
         if self.return_date < self.issue_id.issue_date: # Checks if the return date is before the issue date.
             raise ValidationError("Return date cannot be before the issue date.") # Error message.
-        if self.issue_id.issued_book: 
-            self.issue_id.issued_book.book_copies += 1 # Increase the number of book copies by 1 when a book is returned.
         # To be fixed:
         # if self.return_date > self.issue_id.overdue_date: # Checks if the return date is after the overdue date.
         #     raise ValidationError("Return date cannot be after the overdue date.") # Error message.
-        
+        self.issue_id.issued_book.book_copies += 1 # Increase the number of book copies by 1 when a book is returned.
+
     def __str__(self): # Returns the student, returned book, and return date when data is validated and saved.
         # The printed message is [student] returned [returned book] on [return date].
         return f"{self.issue_id.student} returned {self.issue_id.issued_book} on {self.return_date}"
