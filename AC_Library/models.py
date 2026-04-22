@@ -57,7 +57,7 @@ class Issue(models.Model): # Issue model to store information about book issues.
     issue_id = models.AutoField(primary_key=True) # Stores the unique ID for each book issue.
     student = models.ForeignKey(Student, on_delete=models.CASCADE) # Only uses students that are available in Student class.
     issued_book = models.ForeignKey(Book, on_delete=models.CASCADE) # Only uses books that are available in Book class.
-    issue_date = models.DateField() # Stores the date when a book is issued.
+    issue_date = models.DateField(auto_now_add=True) # Automatically sets the date when a book is issued.
     overdue_date = models.DateField(null=True, blank=True) # Stores the date when a book is overdue.
 
     def clean(self): # Clean function to validate the data before saving it to the database.
@@ -67,6 +67,7 @@ class Issue(models.Model): # Issue model to store information about book issues.
             raise ValidationError("Issue date cannot be after the overdue date.") # Error message.
         if self.issued_book.book_copies > 0: # If there are copies of the book available to issue, decrease the number of copies by 1.
             self.issued_book.book_copies -= 1 # Decrease the number of book copies by 1 when a book is issued.
+            self.issued_book.save() # Save the updated book information to the database.
 
     def __str__(self): # Returns the student, issued book, and issue date when data is validated and saved.
         # The printed message is [student] issued [issued book] on [issue date].
@@ -84,6 +85,7 @@ class Return(models.Model): # Return model to store information about book retur
         # if self.return_date > self.issue_id.overdue_date: # Checks if the return date is after the overdue date.
         #     raise ValidationError("Return date cannot be after the overdue date.") # Error message.
         self.issue_id.issued_book.book_copies += 1 # Increase the number of book copies by 1 when a book is returned.
+        self.issue_id.issued_book.save() # Save the updated book information to the database.
 
     def __str__(self): # Returns the student, returned book, and return date when data is validated and saved.
         # The printed message is [student] returned [returned book] on [return date].
