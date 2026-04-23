@@ -1,10 +1,15 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta
+from django.contrib.auth.models import User, Group
+
+# Defining special entities for fields in classes.
+def calculate_overdue_date():
+    return datetime.today() + timedelta(days=14) # Default overdue date is 14 days from today.
 
 # Create your models here.
 class Student(models.Model): # Student model to store student information.
-    student_id = models.AutoField(primary_key = True) # Stores the unique ID for each student.
+    student_id = models.AutoField(primary_key=True) # Stores the unique ID for each student in the library.
     first_name = models.CharField(max_length = 15, blank=False) # Stores the first name of students, max length of 15.
     last_name = models.CharField(max_length = 15, blank=False) # Stores the last name of students, max length of 15.
     school_email = models.EmailField(max_length = 50, blank=False) # Stores the school email of students, max length of 50.
@@ -49,43 +54,40 @@ class Book(models.Model): # Book model to store book information.
     category_id = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True) # Only uses genres that are available in Category class.
     book_title = models.CharField(max_length=50, blank=False) # Stores the title of the book, max length of 50.
     book_author = models.CharField(max_length=50, blank=False) # Stores the author of the book, max length of 50.
-    book_copies = models.IntegerField(default=1) # There will always be at least 1 copy of a book, so default is set to 1.
+    book_copies_available = models.IntegerField(default=1) # There will always be at least 1 copy of a book, so default is set to 1.
 
     def __str__(self): # Returns the title and author of the book when data is validated and saved.
         return f"'{self.book_title}' by {self.book_author}" # The printed message is ['book title' by book author].
     
 class Issue(models.Model): # Issue model to store information about book issues.
     issue_id = models.AutoField(primary_key=True) # Stores the unique ID for each book issue.
-    student_id = models.ForeignKey(Student, on_delete=models.CASCADE) # Only uses students that are available in Student class.
     book_id = models.ForeignKey(Book, on_delete=models.CASCADE) # Only uses books that are available in Book class.
-    issue_date = models.DateField(default=datetime.today()) # Automatically sets the date when a book is issued.
-    overdue_date = models.DateField(default=datetime.today() + timedelta(days=14)) # Stores the date when a book is overdue, which is 14 days after the issue date.
+    student_id = models.ForeignKey(Student, on_delete=models.CASCADE) # Only uses students that are available in Student class.
+    issue_date = models.DateField(auto_now_add=True) # Automatically sets the date when a book is issued.
+    overdue_date = models.DateField(default=calculate_overdue_date) # Stores the date when a book is overdue, which is 14 days after the issue date.
 
     def clean(self): # Clean function to validate the data before saving it to the database.
-        if self.book_id.book_copies == 0: # Checks if there are no copies of the book available to issue.
+        if self.book_id.book_copies_available == 0: # Checks if there are no copies of the book available to issue.
             raise ValidationError("No copies of the book are available to issue.") # Error message.
-        if self.overdue_date and self.issue_date > self.overdue_date: # Checks if the issue date is after the overdue date.
-            raise ValidationError("Issue date cannot be after the overdue date.") # Error message.
-        if self.book_id.book_copies > 0: # If there are copies of the book available to issue, decrease the number of copies by 1.
-            self.book_id.book_copies -= 1 # Decrease the number of book copies by 1 when a book is issued.
+        if self.book_id.book_copies_available > 0: # If there are copies of the book available to issue, decrease the number of copies by 1.
+            self.book_id.book_copies_available -= 1 # Decrease the number of book copies by 1 when a book is issued.
             self.book_id.save() # Save the updated book information to the database.
 
     def __str__(self): # Returns the student, issued book, and issue date when data is validated and saved.
         # The printed message is [student] issued [issued book] on [issue date].
-        return f"{self.student_id} issued {self.book_id} on {self.issue_date}" 
+        return f"{self.student_id} issued {self.book_id.book_title} on {self.issue_date}" 
     
 class Return(models.Model): # Return model to store information about book returns.
     return_id = models.AutoField(primary_key=True) # Stores the unique ID for each book return.
-    student_id = models.ForeignKey(Student, on_delete=models.CASCADE, null=True) # Students can only return books that they have issued.
     issue_id = models.ForeignKey(Issue, on_delete=models.CASCADE) # Only uses issues that are available in Issue class.
     return_date = models.DateField(default=datetime.today) # Stores todays date when a book is returned.
 
     def clean(self): # Clean function to validate the data before saving it to the database.
         if self.return_date < self.issue_id.issue_date: # Checks if the return date is before the issue date.
             raise ValidationError("Return date cannot be before the issue date.") # Error message.
-        self.issue_id.book_id.book_copies += 1 # Increase the number of book copies by 1 when a book is returned.
+        self.issue_id.book_id.book_copies_available += 1 # Increase the number of book copies by 1 when a book is returned.
         self.issue_id.book_id.save() # Save the updated book information to the database.
 
     def __str__(self): # Returns the student, returned book, and return date when data is validated and saved.
         # The printed message is [student] returned [returned book] on [return date].
-        return f"{self.student_id} returned {self.issue_id.book_id} on {self.return_date}"
+        return f"{self.issue_id.student_id} returned {self.issue_id.book_id.book_title} on {self.return_date}"
