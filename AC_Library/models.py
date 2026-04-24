@@ -1,13 +1,12 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta
-from django.contrib.auth.models import User, Group
 
-# Defining special entities for fields in classes.
+# Function to calculate overdue date and fine.
 def calculate_overdue_date():
     return datetime.today() + timedelta(days=14) # Default overdue date is 14 days from today.
 
-# Create your models here.
+# Library management system models.
 class Student(models.Model): # Student model to store student information.
     student_id = models.AutoField(primary_key=True) # Stores the unique ID for each student in the library.
     first_name = models.CharField(max_length = 15, blank=False) # Stores the first name of students, max length of 15.
@@ -82,12 +81,24 @@ class Return(models.Model): # Return model to store information about book retur
     issue_id = models.ForeignKey(Issue, on_delete=models.CASCADE) # Only uses issues that are available in Issue class.
     return_date = models.DateField(default=datetime.today) # Stores todays date when a book is returned.
 
+    def calculate_overdue_fine(self, issue_date, return_date): # Function to calculate the overdue fine.
+        self.fine = 5.00 # The fine amount for overdue books is $5.00.
+        self.fine_increment = 0.50 # The fine increment for each day overdue is $0.50.
+        self.days_overdue = (return_date - issue_date).days - 14 # Calculates the overdue date.
+        self.fine_amount = self.fine + (self.days_overdue * self.fine_increment)
+
     def clean(self): # Clean function to validate the data before saving it to the database.
         if self.return_date < self.issue_id.issue_date: # Checks if the return date is before the issue date.
             raise ValidationError("Return date cannot be before the issue date.") # Error message.
-        self.issue_id.book_id.book_copies_available += 1 # Increase the number of book copies by 1 when a book is returned.
-        self.issue_id.book_id.save() # Save the updated book information to the database.
+        if self.return_date > self.issue_id.overdue_date: # Checks if the return date is after the overdue date.
+            # Calls the function to calculate the overdue date and fine.
+            self.calculate_overdue_fine(self.issue_id.issue_date, self.return_date) 
+            return f"Book is overdue. Fine amount: ${self.fine_amount:.2f}" # The printed message is "Book is overdue. Fine amount: $[fine amount]."
+        else: # If the return date is valid, return the book to the library.
+            self.issue_id.book_id.book_copies_available += 1 # Increase the number of book copies by 1 when a book is returned.
+            self.issue_id.book_id.save() # Save the updated book information to the database.
 
     def __str__(self): # Returns the student, returned book, and return date when data is validated and saved.
-        # The printed message is [student] returned [returned book] on [return date].
+        # The printed message is [student] returned [returned book] on [return date]. 
         return f"{self.issue_id.student_id} returned {self.issue_id.book_id.book_title} on {self.return_date}"
+                
