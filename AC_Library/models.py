@@ -2,6 +2,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta
+from decimal import Decimal as decimal
 
 # Function to calculate overdue date for issued books.
 def calculate_overdue_date():
@@ -73,12 +74,16 @@ class Book(models.Model):
 # Issue model to store information about book issues in the library.
 class Issue(models.Model): 
     issue_id = models.AutoField(primary_key=True) # Stores the unique ID for each book issue.
-    book_id = models.ForeignKey(Book, on_delete=models.CASCADE) # Only uses books that are available in Book class.
-    student_id = models.ForeignKey(Student, on_delete=models.CASCADE) # Only uses students that are available in Student class.
+    book_id = models.ForeignKey(Book, on_delete=models.CASCADE, null=True) # Only uses books that are available in Book class.
+    student_id = models.ForeignKey(Student, on_delete=models.CASCADE, null=True) # Only uses students that are available in Student class.
     issue_date = models.DateField(auto_now_add=True) # Automatically sets the date when a book is issued.
     overdue_date = models.DateField(default=calculate_overdue_date) # Stores the date when a book is overdue.
 
     def clean(self): # Clean function to validate the data before saving it to the database.
+        if self.book_id is None: # Checks if a book has been selected for issue.
+            raise ValidationError("Please select a book to issue.") # Error message for book selection.
+        if self.student_id is None: # Checks if a student has been selected for issue.
+            raise ValidationError("Please select a student to issue.") # Error message for student selection.
         if self.book_id.book_copies_available == 0: # Checks if there are no copies of the book available to issue.
             raise ValidationError("No copies of the book are available to issue.") # Error message.
         if self.book_id.book_copies_available > 0: # If there are copies of the book available to issue, decrease the number of copies by 1.
@@ -91,10 +96,12 @@ class Issue(models.Model):
 # Return model to store information about book returns in the library.
 class Return(models.Model): 
     return_id = models.AutoField(primary_key=True) # Stores the unique ID for each book return.
-    issue_id = models.ForeignKey(Issue, on_delete=models.CASCADE) # Only uses issues that are available in Issue class.
+    issue_id = models.ForeignKey(Issue, on_delete=models.CASCADE, null=True) # Only uses issues that are available in Issue class.
     return_date = models.DateField(default=datetime.today) # Stores todays date when a book is returned.
 
     def clean(self): # Clean function to validate the data before saving it to the database.
+        if self.issue_id is None: # Checks if an issue has been selected for return.
+            raise ValidationError("Please select an issue to return.") # Error message for issue selection.
         if self.return_date < self.issue_id.issue_date: # Checks if the return date is before the issue date.
             raise ValidationError("Return date cannot be before the issue date.") # Error message.
         
@@ -106,8 +113,8 @@ class Return(models.Model):
     def save(self, *args, **kwargs): # Save function to calculate the overdue fine and update the book copies when a book is returned.
         if self.return_date > self.issue_id.overdue_date: # Checks if the return date is after the overdue date.
             days_overdue = self.calculate_days_overdue() # Calculate the number of days overdue.
-            penalty_fee = 10.00 # Base fine for overdue books.
-            overdue_fines = penalty_fee + (days_overdue * 0.50) # Calculates the fine amount for overdue books. ($10.00 plus $0.50 for each day overdue)
+            penalty_fee = decimal("10.00") # Base fine for overdue books.
+            overdue_fines = penalty_fee + (days_overdue * decimal("0.50")) # Calculates the fine amount for overdue books. ($10.00 plus $0.50 for each day overdue)
             self.issue_id.student_id.fine_amount += overdue_fines # Add the overdue fine amount to the student's fine amount.
             self.issue_id.student_id.save() # Save the updated student information to the database.
         else:
