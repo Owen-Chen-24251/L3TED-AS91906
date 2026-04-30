@@ -1,21 +1,22 @@
+# Import necessary modules for the library management system models.
 from django.db import models
 from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta
 
-# Function to calculate overdue date and days overdue.
+# Function to calculate overdue date for issued books.
 def calculate_overdue_date():
-    return datetime.today() + timedelta(days=14) # Default overdue date is 14 days from today.
+    return datetime.today() + timedelta(days=14) # Default overdue date is 14 days from the day a book is issued.
 
 # Library management system models.
-class Student(models.Model): # Student model to store student information.
+# Student model to store student information.
+class Student(models.Model):
     student_id = models.AutoField(primary_key=True) # Stores the unique ID for each student in the library.
     first_name = models.CharField(max_length = 15, blank=False) # Stores the first name of students, max length of 15.
     last_name = models.CharField(max_length = 15, blank=False) # Stores the last name of students, max length of 15.
     school_email = models.EmailField(max_length = 50, blank=False) # Stores the school email of students, max length of 50.
-    fine_amount = models.DecimalField(max_digits=5, decimal_places=2, default=0.00) # Stores the fine amount for overdue books.
+    fine_amount = models.DecimalField(max_digits=5, decimal_places=2, default=0.00) # Stores the fine amount for overdue books for each student.
 
     def clean(self): # Clean function to validate the data before saving it to the database.
-        # Checks for any empty fields.
         if not self.first_name or not self.last_name or not self.school_email: # Checks if any of the fields are empty.
             raise ValidationError({ # Raises error message for empty fields.
                 'first_name': "First name is required.", # Error message for first name.
@@ -31,7 +32,6 @@ class Student(models.Model): # Student model to store student information.
             raise ValidationError({
                 'first_name': "First name must be at least 3 characters." # Error message for first name.
             })
-
         # Validates last name.
         if not self.last_name.isalpha(): # Checks if the last name contains only letters (alphabet).
             raise ValidationError({
@@ -41,7 +41,6 @@ class Student(models.Model): # Student model to store student information.
             raise ValidationError({
                 'last_name': "Last name must be at least 3 characters." # Error message for last name.
             })
-
         # Validate email by making sure it ends with the correct domain.
         if not self.school_email.endswith("@ac.school.nz"): # Checks if the school email ends with "@ac.school.nz".
             raise ValidationError({
@@ -49,31 +48,35 @@ class Student(models.Model): # Student model to store student information.
             })
 
     def __str__(self): # Returns the full name of students when data is validated and saved.
-        return f"{self.first_name} {self.last_name}" # The printed message is [first name last name].
+        return f"{self.first_name} {self.last_name}" # Return message.
     
-class Genre(models.Model): # Genre model to store book genres.
+# Genre model to store categories of books in the library.
+class Genre(models.Model):
     genre_id = models.AutoField(primary_key=True) # Stores the unique ID for genres.
     genre_name = models.CharField(max_length=50, blank=False) # Stores the name of the genre, max length of 50.
 
-    def __str__(self): # Returns the genre name when data is validated and saved.
-        return self.genre_name # The printed message is the genre name.
+    def __str__(self): # Returns the genre name.
+        return self.genre_name # Return message.
 
-class Book(models.Model): # Book model to store book information.
+# Book model to store information about books in the library.
+class Book(models.Model): 
     book_id = models.AutoField(primary_key=True) # Stores the unique ID for each book in the library.
     genre_id = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True) # Only uses genres that are available in Genre class.
     book_title = models.CharField(max_length=50, blank=False) # Stores the title of the book, max length of 50.
     book_author = models.CharField(max_length=50, blank=False) # Stores the author of the book, max length of 50.
+    book_cover = models.ImageField(upload_to='book_covers/', blank=True, null=True) # Stores the cover image of the book.
     book_copies_available = models.IntegerField(default=1) # There will always be at least 1 copy of a book, so default is set to 1.
 
     def __str__(self): # Returns the title and author of the book when data is validated and saved.
-        return f"'{self.book_title}' by {self.book_author}" # The printed message is ['book title' by book author].
+        return f"'{self.book_title}' by {self.book_author}" # Return message for book title and author.
     
-class Issue(models.Model): # Issue model to store information about book issues.
+# Issue model to store information about book issues in the library.
+class Issue(models.Model): 
     issue_id = models.AutoField(primary_key=True) # Stores the unique ID for each book issue.
     book_id = models.ForeignKey(Book, on_delete=models.CASCADE) # Only uses books that are available in Book class.
     student_id = models.ForeignKey(Student, on_delete=models.CASCADE) # Only uses students that are available in Student class.
     issue_date = models.DateField(auto_now_add=True) # Automatically sets the date when a book is issued.
-    overdue_date = models.DateField(default=calculate_overdue_date) # Stores the date when a book is overdue, which is 14 days after the issue date.
+    overdue_date = models.DateField(default=calculate_overdue_date) # Stores the date when a book is overdue.
 
     def clean(self): # Clean function to validate the data before saving it to the database.
         if self.book_id.book_copies_available == 0: # Checks if there are no copies of the book available to issue.
@@ -83,10 +86,10 @@ class Issue(models.Model): # Issue model to store information about book issues.
             self.book_id.save() # Save the updated book information to the database.
 
     def __str__(self): # Returns the student, issued book, and issue date when data is validated and saved.
-        # The printed message is [student] issued [issued book] on [issue date].
-        return f"{self.student_id} issued {self.book_id.book_title} on {self.issue_date}" 
+        return f"{self.student_id} issued {self.book_id.book_title} on {self.issue_date}" # Return message for student, issued book, and issue date.
 
-class Return(models.Model): # Return model to store information about book returns.
+# Return model to store information about book returns in the library.
+class Return(models.Model): 
     return_id = models.AutoField(primary_key=True) # Stores the unique ID for each book return.
     issue_id = models.ForeignKey(Issue, on_delete=models.CASCADE) # Only uses issues that are available in Issue class.
     return_date = models.DateField(default=datetime.today) # Stores todays date when a book is returned.
@@ -103,7 +106,8 @@ class Return(models.Model): # Return model to store information about book retur
     def save(self, *args, **kwargs): # Save function to calculate the overdue fine and update the book copies when a book is returned.
         if self.return_date > self.issue_id.overdue_date: # Checks if the return date is after the overdue date.
             days_overdue = self.calculate_days_overdue() # Calculate the number of days overdue.
-            overdue_fines = 5.00 + (days_overdue * 0.50) # Calculate the total fine amount for overdue books, which is $5.00 plus $0.50 for each day overdue.
+            penalty_fee = 10.00 # Base fine for overdue books.
+            overdue_fines = penalty_fee + (days_overdue * 0.50) # Calculates the fine amount for overdue books. ($10.00 plus $0.50 for each day overdue)
             self.issue_id.student_id.fine_amount += overdue_fines # Add the overdue fine amount to the student's fine amount.
             self.issue_id.student_id.save() # Save the updated student information to the database.
         else:
@@ -111,9 +115,8 @@ class Return(models.Model): # Return model to store information about book retur
 
         self.issue_id.book_id.book_copies_available += 1 # Increase the number of book copies by 1 when a book is returned.
         self.issue_id.book_id.save() # Save the updated book information to the database.
-        super().save(*args, **kwargs)
+        super().save(*args, **kwargs) # Saves the return information to the database after calculating fines and updating book copies.
 
     def __str__(self): # Returns the student, returned book, and return date when data is validated and saved.
-        # The printed message is [student] returned [returned book] on [return date]. 
-        return f"{self.issue_id.student_id} returned {self.issue_id.book_id.book_title} on {self.return_date}"
+        return f"{self.issue_id.student_id} returned {self.issue_id.book_id.book_title} on {self.return_date}" # Return message.
                 
