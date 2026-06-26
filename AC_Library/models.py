@@ -126,4 +126,11 @@ class Return(models.Model):
 
     def __str__(self): # Returns the student, returned book, and return date when data is validated and saved.
         return f"{self.issue_id.student_id} returned {self.issue_id.book_id.book_title} on {self.return_date}" # Return message.
-                
+    
+class ContactForm(models.Model):
+    first_name = models.CharField(max_length = 15)
+    last_name = models.CharField(max_length=15)
+    email = models.EmailField(max_length=50)
+    
+    def __str__(self):
+        return f'{self.first_name} - {self.last_name}'

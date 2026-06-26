@@ -21,3 +21,5 @@ class ReturnAdmin(admin.ModelAdmin):
             if db_field.name == "issue_id": # Checks if the foreign key field is 'issue_id'.
                 kwargs["queryset"] = Issue.objects.filter(return__isnull=True) # Filter the queryset to only include issues that have not been returned yet.
             return super().formfield_for_foreignkey(db_field, request, **kwargs) # Returns the form field with filtered books that haven't been returned.
+    
+
