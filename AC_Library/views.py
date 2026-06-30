@@ -6,13 +6,6 @@ def home(request):
     return render(request, 'home.html')
 
 def aboutus(request):
-    return render(request, 'aboutus.html')
-
-def books(request):
-    all_books = Book.objects.all()
-    return render(request, 'books.html', {'books': all_books})
-
-def contact(request):
     if request.method == 'POST':
         form = ContactForm(request.POST) # Pass the submitted data to the form
         if form.is_valid():               # Automatically validates field types and constraints
@@ -20,5 +13,8 @@ def contact(request):
             return redirect('success_url') # Redirect to a success page
     else:
         form = ContactForm()             # Provide a blank form for GET requests
-        
-    return render(request, 'contact.html', {'form': form})
+    return render(request, 'aboutus.html', {'form': form})
+
+def books(request):
+    all_books = Book.objects.all()
+    return render(request, 'books.html', {'books': all_books})

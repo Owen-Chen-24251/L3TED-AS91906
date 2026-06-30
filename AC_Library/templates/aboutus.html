@@ -1,9 +1,32 @@
 {% extends 'base.html' %}
 
-{% block content %}
-
-<h2>About Us</h2>
-
+{% block section_top %}
+<h2>About Our School</h2>
 <p>Library Details TBA</p>
+{% endblock %}
 
+{% block section_middle %}
+<h2>Our Library Staff & Values</h2>
+<p>Information about our librarian, staff members, and library values coming soon.</p>
+{% endblock %}
+
+{% block section_bottom %}
+<h2>Contact Us</h2>
+<p>Please contact our team if you have any enquiries! We'll keep in touch soon.</p>
+<form method="POST">
+    {% csrf_token %}
+
+    <label for="fname">First Name:</label>
+    <input type="text" id="fname" name="fname">
+
+    <label for="lname">Last Name:</label>
+    <input type="text" id="lname" name="lname">
+
+    <label for="email">School Email:</label>
+    <input type="email" id="email" name="email">
+
+    {{ form.as_p }}
+
+    <button type="submit">Submit Feedback</button>
+</form>
 {% endblock %}

@@ -173,17 +173,23 @@
 
         <section class="section-top">
             <div class="section-inner">
-                {% block content %}
+                {% block section_top %}
                 {% endblock %}
             </div>
         </section>
 
         <section class="section-middle">
-            <div class="section-inner"></div>
+            <div class="section-inner">
+                {% block section_middle %}
+                {% endblock %}
+            </div>
         </section>
 
         <section class="section-bottom">
-            <div class="section-inner"></div>
+            <div class="section-inner">
+                {% block section_bottom %}
+                {% endblock %}
+            </div>
         </section>
 
         <footer>

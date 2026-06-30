@@ -1,8 +1,19 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block content %}
+{% block section_top %}
 <h2>Welcome to Alfriston College Library</h2>
-<p>This is the home page information</p>
+<p>This is the home page information (Login and Signup button to be created)</p>
 {% endblock %}
 
+{% block section_middle %}
+<h2>Popular Books</h2>
+<p>Check out our most popular books! (will add when books table is finalised)</p>
+{% endblock %}
+
+{% block section_bottom %}
+<h2>School Hours</h2>
+<p>9:00 AM - 3:00 PM for students Monday - Friday, with the exception of Wednesdays, 9:00 AM - 2:30 PM.</p>
+<p>School events, sports training, and other activities may have different schedules.</p>
+<p>Closed on weekends and public holidays.</p>
+{% endblock %}
