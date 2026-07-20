@@ -1,173 +1,206 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block section_top %}
 <style>
-
-
-    *{
-        margin:0;
-        padding:0;
-        box-sizing:border-box;
-    }
-    
-    
-    body{
-        background:#1f1f1f;
-        font-family:Arial, Helvetica, sans-serif;
-    }
-    
-    
-    h1{
-        color:white;
-        text-align:center;
-        padding:30px;
-        font-size:45px;
-    }
-    
-    
-    .slider{
+    .book_display{
         width:100%;
         overflow:hidden;
         position:relative;
-        padding:20px 70px;
+        padding:14px 10px 28px;
+        max-width:980px;
+        margin:0 auto;
     }
-    
-    
-    .slider-track{
+
+    .display_cycle{
         display:flex;
-        transition:transform 0.8s ease;
+        gap:16px;
+        transition:transform 0.45s ease;
+        will-change:transform;
     }
-    
-    
-    .book{
-        min-width:33.333%;
-        padding:20px;
+
+    .book-card{
+        flex:0 0 calc((100% - 32px) / 3);
+        max-width:calc((100% - 32px) / 3);
+        min-width:calc((100% - 32px) / 3);
+        background:white;
+        border-radius:18px;
+        overflow:hidden;
+        box-shadow:0 14px 28px rgba(0,0,0,0.12);
+        border:1px solid rgba(0,0,0,0.08);
+    }
+
+    .book-card img{
+        width:100%;
+        height:280px;
+        object-fit:cover;
+        display:block;
+    }
+
+    .book-placeholder{
+        width:100%;
+        height:280px;
+        display:grid;
+        place-items:center;
+        background:#f5f5f5;
+        color:#555;
+        font-size:0.95rem;
+        padding:1rem;
         text-align:center;
     }
-    
-    
-    .book img{
-        width:100%;
-        height:520px;
-        object-fit:cover;
-        border-radius:15px;
-        box-shadow:0 8px 20px rgba(0,0,0,.6);
-        transition:0.4s;
+
+    .book-info{
+        padding:16px;
     }
-    
-    
-    .book img:hover{
-        transform:scale(1.05);
-    }
-    
-    
+
     .title{
-        color:white;
-        font-size:24px;
-        font-weight:bold;
-        margin-top:15px;
+        color:#111;
+        font-size:1rem;
+        font-weight:700;
+        margin-bottom:6px;
+        line-height:1.35;
     }
-    
-    
+
     .author{
-        color:#d3d3d3;
-        font-size:18px;
-        margin-top:5px;
+        color:#6a7280;
+        font-size:0.92rem;
+        line-height:1.4;
     }
-    
-    
-    button{
+
+    .display_cycle-nav{
         position:absolute;
-        top:45%;
+        top:50%;
+        left:0;
+        right:0;
+        display:flex;
+        justify-content:space-between;
         transform:translateY(-50%);
-        width:55px;
-        height:55px;
+        pointer-events:none;
+    }
+
+    .display_cycle-button{
+        pointer-events:auto;
+        width:42px;
+        height:42px;
         border:none;
         border-radius:50%;
-        background:#32174D;
+        background:rgba(50,23,77,0.95);
         color:white;
-        font-size:30px;
+        font-size:24px;
         cursor:pointer;
-        z-index:10;
+        display:grid;
+        place-items:center;
+        box-shadow:0 10px 22px rgba(0,0,0,0.18);
     }
-    
-    
-    button:hover{
+
+    .display_cycle-button:hover{
         background:#5d2c91;
     }
-    
-    
-    #prev{
-        left:10px;
+
+    .section-heading h2{
+        margin-bottom:6px;
+        color:white;
     }
-    
-    
-    #next{
-        right:10px;
+
+    .section-heading p{
+        color:#d9d9d9;
+        max-width:680px;
+        margin-bottom:18px;
     }
-    
-    
-    </style>
-{% block section_top %}
+
+    .no-books{
+        color:#fff;
+        margin-top:18px;
+    }
+
+    @media (max-width: 960px) {
+        .book-card{
+            flex:0 0 calc(50% - 8px);
+            max-width:calc(50% - 8px);
+            min-width:calc(50% - 8px);
+        }
+    }
+
+    @media (max-width: 680px) {
+        .book-card{
+            flex:0 0 100%;
+            max-width:100%;
+            min-width:100%;
+        }
+
+        .carousel-nav {
+            display:none;
+        }
+    }
+</style>
 <h2>Welcome to Alfriston College Library</h2>
 <p>This is the home page information (Login and Signup button to be created)</p>
 {% endblock %}
 
 {% block section_middle %}
-<h2>Popular Books</h2>
-<p>Check out our most popular books! (will add when books table is finalised)</p>
-<div class="slider">
-    <button id="prev">&#10094;</button>
-    <div class="slider-track" id="track">
+<div class="section-heading">
+    <h2>Popular Books</h2>
+    <p>Swipe through our most loved library titles and discover the story behind each cover.</p>
+</div>
+{% if books %}
+<div class="book_display">
+    <div class="display_cycle" id="display-cycle-track">
         {% for book in books %}
-        <div class="book">
-            {% if book.img %}
-                <img src="{{ book.img.url }}" alt="{{ book.title }}">
+        <article class="book-card">
+            {% if book.book_cover %}
+                <img src="{{ book.book_cover.url }}" alt="{{ book.book_title }}">
+            {% else %}
+                <div class="book-placeholder">No cover available</div>
             {% endif %}
-            <div class="title">{{ book.title }}</div>
-            <div class="author">{{ book.author }}</div>
-        </div>
+            <div class="book-info">
+                <div class="title">{{ book.book_title }}</div>
+                <div class="author">{{ book.book_author }}</div>
+            </div>
+        </article>
         {% endfor %}
     </div>
-    <button id="next">&#10095;</button>
+    <div class="display_cycle-nav">
+        <button class="display_cycle-button" id="prev" type="button">&#10094;</button>
+        <button class="display_cycle-button" id="next" type="button">&#10095;</button>
+    </div>
 </div>
+{% else %}
+<div class="no-books">No books are available right now.</div>
+{% endif %}
 
 <script>
-const track = document.getElementById("track");
-const books = document.querySelectorAll(".book");
-const visibleBooks = 3;
-let index = 0;
-function moveSlider(){
-    const width = books[0].offsetWidth;
-    track.style.transform =
-        `translateX(-${index * width}px)`;
+const track = document.getElementById('display-cycle-track');
+const cards = document.querySelectorAll('.book-card');
+const nextButton = document.getElementById('next');
+const prevButton = document.getElementById('prev');
+const visible = 3;
+let currentIndex = 0;
+
+function updateCarousel() {
+    if (!cards.length) return;
+    const cardWidth = cards[0].offsetWidth;
+    const gap = 16;
+    const translateX = currentIndex * (cardWidth + gap);
+    track.style.transform = `translateX(-${translateX}px)`;
 }
-document.getElementById("next").onclick = function(){
-    if(index < books.length - visibleBooks){
-        index++;
-    }else{
-        index = 0;
-    }
-    moveSlider();
+
+function clampIndex(index) {
+    return Math.max(0, Math.min(index, Math.max(0, cards.length - visible)));
 }
-document.getElementById("prev").onclick = function(){
-    if(index > 0){
-        index--;
-    }else{
-        index = books.length - visibleBooks;
-    }
-    moveSlider();
-}
-setInterval(function(){
-    if(index < books.length - visibleBooks){
-        index++;
-    }else{
-        index = 0;
-    }
-    moveSlider();
-},4000);
+
+nextButton.onclick = () => {
+    currentIndex = clampIndex(currentIndex + 1);
+    updateCarousel();
+};
+
+prevButton.onclick = () => {
+    currentIndex = clampIndex(currentIndex - 1);
+    updateCarousel();
+};
+
+window.addEventListener('resize', updateCarousel);
+updateCarousel();
 </script>
 {% endblock %}
-
 {% block section_bottom %}
 <h2>School Hours</h2>
 <p>9:00 AM - 3:00 PM for students Monday - Friday, with the exception of Wednesdays, 9:00 AM - 2:30 PM.</p>

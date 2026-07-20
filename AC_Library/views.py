@@ -6,7 +6,8 @@ from .models import Book, Student
 
 # Create your views here.
 def home(request):
-    return render(request, 'home.html')
+    all_books = Book.objects.all()
+    return render(request, 'home.html', {'books': all_books})
 
 def aboutus(request):
     if request.method == 'POST':
@@ -20,7 +21,7 @@ def aboutus(request):
 
 def books(request):
     all_books = Book.objects.all()
-    return render(request, 'home.html', {'books': all_books})
+    return render(request, 'books.html', {'books': all_books})
 
 def register(request):
     if request.method == 'POST':

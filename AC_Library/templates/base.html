@@ -52,7 +52,8 @@
         .brand-row {
             display: flex;
             align-items: center;
-            gap: 5rem;
+            gap: 1rem;
+            min-width: 0;
         }
 
         .brand-icon {
@@ -67,7 +68,7 @@
         }
 
         .brand-title {
-            min-width: 180px;
+            min-width: 140px;
             padding: 0.55rem 1rem;
             border-radius: 999px;
             background: rgba(255,255,255,0.95);
@@ -81,14 +82,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 1.5rem;
-            flex: 1;
+            gap: 1.25rem;
+            flex: 1 1 420px;
+            min-width: 0;
+            margin: 0 1rem;
         }
 
         .site-nav a {
             color: white;
             font-weight: 600;
             letter-spacing: 0.01em;
+            white-space: nowrap;
         }
 
         .site-nav a:hover {
