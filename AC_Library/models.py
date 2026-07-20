@@ -15,6 +15,8 @@ class Student(models.Model):
     first_name = models.CharField(max_length = 15, blank=False) # Stores the first name of students, max length of 15.
     last_name = models.CharField(max_length = 15, blank=False) # Stores the last name of students, max length of 15.
     school_email = models.EmailField(max_length = 50, blank=False) # Stores the school email of students, max length of 50.
+    password = models.CharField(max_length=128, blank=False, default='') # Stores the hashed password for student login.
+    phone_number = models.CharField(max_length=15, blank=True, null=True) # Optional phone number for the student.
     fine_amount = models.DecimalField(max_digits=5, decimal_places=2, default=0.00) # Stores the fine amount for overdue books for each student.
 
     def clean(self): # Clean function to validate the data before saving it to the database.
@@ -131,6 +133,7 @@ class ContactForm(models.Model):
     first_name = models.CharField(max_length = 15)
     last_name = models.CharField(max_length=15)
     email = models.EmailField(max_length=50)
+    message = models.TextField(max_length=500, blank=True, default='')
     
     def __str__(self):
         return f'{self.first_name} - {self.last_name}'

@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-
 {% block content_top %}
 <h2>Books Page</h2>
 
@@ -12,11 +11,14 @@
     </tr>
     {% for book in books %}
     <tr>
-        <td><img src="{{ book.img.url }}" width="100"></td>
-        <td>{{ book.title }}</td>
-        <td>{{ book.author }}</td>
-        <td>{{ book.total_copies }}</td>
+        <td><img src="{{ book.img.url }}" width="50"></td>
+        <td>{{ book.book_title }}</td>
+        <td>{{ book.book_author }}</td>
+        <td>{{ book.book_copies_available }}</td>
     </tr>
     {% endfor %}
 </table>
+{% endblock %}
+{% block content_middle %}
+<p1>Hello</p1>
 {% endblock %}

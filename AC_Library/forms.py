@@ -1,7 +1,7 @@
 from django import forms
-from .models import Contact
+from .models import ContactForm as ContactFormModel
 
 class ContactForm(forms.ModelForm):
     class Meta:
-        model = Contact
-        fields = ['first name', 'last name', 'email', 'message'] # The fields you want in your form
+        model = ContactFormModel
+        fields = ['first_name', 'last_name', 'email', 'message'] # The fields you want in your form

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content_top %}
+<style>
+.login-container{
+    width:450px;
+    margin:70px auto;
+    background:white;
+    padding:40px;
+    border-radius:12px;
+    box-shadow:0 0 15px rgba(0,0,0,0.2);
+}
+.login-container h1{
+    text-align:center;
+    color:#32174D;
+    margin-bottom:30px;
+}
+.login-container label{
+    display:block;
+    margin-top:15px;
+    font-weight:bold;
+    color:black;
+}
+.login-container input{
+    width:100%;
+    padding:12px;
+    margin-top:8px;
+    border:1px solid #aaa;
+    border-radius:6px;
+    font-size:16px;
+}
+.login-container input:focus{
+    outline:none;
+    border:2px solid #32174D;
+}
+.login-container button{
+    width:100%;
+    margin-top:30px;
+    padding:14px;
+    background:#32174D;
+    color:white;
+    border:none;
+    border-radius:6px;
+    font-size:18px;
+    cursor:pointer;
+}
+.login-container button:hover{
+    background:#512b81;
+}
+/* Error message */
+.error-box{
+    background:#ffe6e6;
+    border:2px solid red;
+    color:#b30000;
+    padding:15px;
+    border-radius:8px;
+    margin-bottom:20px;
+    text-align:center;
+}
+/* Register link */
+.register-link{
+    text-align:center;
+    margin-top:20px;
+}
+.register-link a{
+    color:#32174D;
+    font-weight:bold;
+    text-decoration:none;
+}
+.register-link a:hover{
+    text-decoration:underline;
+}
+</style>
+<div class="login-container">
+<h1>Student Login</h1>
+{% if error %}
+<div class="error-box">
+{{ error }}
+</div>
+{% endif %}
+<form method="POST">
+{% csrf_token %}
+
+
+<label for="email"> Email Address </label>
+<input type="email" id="email" name="school_email" value="{{ school_email|default:'' }}" placeholder="student@ac.school.nz" required>
+
+
+<label for="password"> Password </label>
+<input type="password" id="password" name="password" placeholder="Enter password" required>
+
+
+<button type="submit"> Login </button>
+</form>
+<div class="register-link">
+<p>
+Don't have an account?
+<a href="{% url 'register' %}"> Register Here </a>
+</p>
+</div>
+</div>
+{% endblock %}
