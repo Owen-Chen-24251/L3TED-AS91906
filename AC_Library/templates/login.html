@@ -1,101 +1,111 @@
 {% extends "base.html" %}
+
 {% block section_top %}
+<h2>Student Login</h2>
+<p>Sign in using your school email to access the library system.</p>
+<p><strong>New here?</strong> Create an account by clicking Register after logging in.</p>
+{% endblock %}
+
+{% block section_middle %}
 <style>
 .login-container{
-    width:450px;
-    margin:70px auto;
+    max-width:420px;
+    margin:40px auto;
     background:white;
-    padding:40px;
-    border-radius:12px;
-    box-shadow:0 0 15px rgba(0,0,0,0.2);
+    padding:34px;
+    border-radius:14px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.12);
 }
 .login-container h1{
     text-align:center;
     color:#32174D;
-    margin-bottom:30px;
+    margin-bottom:24px;
+    font-size:1.8rem;
 }
 .login-container label{
     display:block;
-    margin-top:15px;
-    font-weight:bold;
-    color:black;
+    margin-top:16px;
+    font-weight:700;
+    color:#212121;
 }
 .login-container input{
     width:100%;
     padding:12px;
     margin-top:8px;
-    border:1px solid #aaa;
-    border-radius:6px;
-    font-size:16px;
+    border:1px solid #ccc;
+    border-radius:10px;
+    font-size:1rem;
 }
 .login-container input:focus{
     outline:none;
-    border:2px solid #32174D;
+    border-color:#32174D;
+    box-shadow:0 0 0 3px rgba(50,23,77,0.1);
 }
 .login-container button{
     width:100%;
-    margin-top:30px;
+    margin-top:28px;
     padding:14px;
     background:#32174D;
     color:white;
     border:none;
-    border-radius:6px;
-    font-size:18px;
+    border-radius:10px;
+    font-size:1rem;
+    font-weight:700;
     cursor:pointer;
 }
 .login-container button:hover{
     background:#512b81;
 }
-/* Error message */
 .error-box{
     background:#ffe6e6;
-    border:2px solid red;
-    color:#b30000;
-    padding:15px;
-    border-radius:8px;
+    border:1px solid #d62b2b;
+    color:#8a0303;
+    padding:14px;
+    border-radius:10px;
     margin-bottom:20px;
     text-align:center;
 }
-/* Register link */
 .register-link{
     text-align:center;
-    margin-top:20px;
+    margin-top:22px;
 }
-.register-link a{
-    color:#32174D;
-    font-weight:bold;
-    text-decoration:none;
-}
-.register-link a:hover{
-    text-decoration:underline;
-}
+    .register-link p{
+        margin:0 0 10px;
+        color:#444;
+        font-size:0.95rem;
+    }
+    .register-link a{
+        display:inline-block;
+        padding:10px 18px;
+        background:#32174D;
+        color:#fff;
+        font-weight:700;
+        border-radius:999px;
+        text-decoration:none;
+        transition:background 0.2s ease;
+    }
+    .register-link a:hover{
+        background:#512b81;
+    }
 </style>
 <div class="login-container">
-<h1>Student Login</h1>
-{% if error %}
-<div class="error-box">
-{{ error }}
-</div>
-{% endif %}
-<form method="POST">
-{% csrf_token %}
+    <h1>Student Login</h1>
+    {% if error %}
+    <div class="error-box">{{ error }}</div>
+    {% endif %}
+    <form method="POST">
+        {% csrf_token %}
+        <label for="email">School Email</label>
+        <input type="email" id="email" name="school_email" value="{{ school_email|default:'' }}" placeholder="student@ac.school.nz" required>
 
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter password" required>
 
-<label for="email"> Email Address </label>
-<input type="email" id="email" name="school_email" value="{{ school_email|default:'' }}" placeholder="student@ac.school.nz" required>
-
-
-<label for="password"> Password </label>
-<input type="password" id="password" name="password" placeholder="Enter password" required>
-
-
-<button type="submit"> Login </button>
-</form>
-<div class="register-link">
-<p>
-Don't have an account?
-<a href="{% url 'register' %}"> Register Here </a>
-</p>
-</div>
+        <button type="submit">Login</button>
+    </form>
+    <div class="register-link">
+        <p>Don't have an account?</p>
+        <a href="{% url 'register' %}">Register here</a>
+    </div>
 </div>
 {% endblock %}

@@ -175,7 +175,7 @@ const prevButton = document.getElementById('prev');
 const visible = 3;
 let currentIndex = 0;
 
-function updateCarousel() {
+function updateDisplayCycle() {
     if (!cards.length) return;
     const cardWidth = cards[0].offsetWidth;
     const gap = 16;
@@ -183,22 +183,30 @@ function updateCarousel() {
     track.style.transform = `translateX(-${translateX}px)`;
 }
 
-function clampIndex(index) {
-    return Math.max(0, Math.min(index, Math.max(0, cards.length - visible)));
+function getMaxDisplayIndex() {
+    return Math.max(0, cards.length - visible);
 }
 
 nextButton.onclick = () => {
-    currentIndex = clampIndex(currentIndex + 1);
-    updateCarousel();
+    const maxIndex = getMaxDisplayIndex();
+    currentIndex = currentIndex < maxIndex ? currentIndex + 1 : 0;
+    updateDisplayCycle();
 };
 
 prevButton.onclick = () => {
-    currentIndex = clampIndex(currentIndex - 1);
-    updateCarousel();
+    const maxIndex = getMaxDisplayIndex();
+    currentIndex = currentIndex > 0 ? currentIndex - 1 : maxIndex;
+    updateDisplayCycle();
 };
 
-window.addEventListener('resize', updateCarousel);
-updateCarousel();
+setInterval(() => {
+    const maxIndex = getMaxDisplayIndex();
+    currentIndex = currentIndex < maxIndex ? currentIndex + 1 : 0;
+    updateDisplayCycle();
+}, 5000); // Auto scroll cycle every 5 seconds.
+
+window.addEventListener('resize', updateDisplayCycle);
+updateDisplayCycle();
 </script>
 {% endblock %}
 {% block section_bottom %}
