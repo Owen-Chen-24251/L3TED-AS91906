@@ -18,10 +18,17 @@
         will-change:transform;
     }
 
-    .book-card{
+    .book-card-link {
+        display:block;
         flex:0 0 calc((100% - 32px) / 3);
         max-width:calc((100% - 32px) / 3);
         min-width:calc((100% - 32px) / 3);
+        color:inherit;
+        text-decoration:none;
+    }
+
+    .book-card{
+        height:100%;
         background:white;
         border-radius:18px;
         overflow:hidden;
@@ -96,6 +103,10 @@
         background:#5d2c91;
     }
 
+    .genre-section{
+        margin-bottom:36px;
+    }
+
     .section-heading h2{
         margin-bottom:6px;
         color:white;
@@ -113,7 +124,7 @@
     }
 
     @media (max-width: 960px) {
-        .book-card{
+        .book-card-link{
             flex:0 0 calc(50% - 8px);
             max-width:calc(50% - 8px);
             min-width:calc(50% - 8px);
@@ -121,7 +132,7 @@
     }
 
     @media (max-width: 680px) {
-        .book-card{
+        .book-card-link{
             flex:0 0 100%;
             max-width:100%;
             min-width:100%;
@@ -143,24 +154,26 @@
 </div>
 {% if books %}
 <div class="book_display">
-    <div class="display_cycle" id="display-cycle-track">
+    <div class="display_cycle" data-track>
         {% for book in books %}
-        <article class="book-card">
-            {% if book.book_cover %}
-                <img src="{{ book.book_cover.url }}" alt="{{ book.book_title }}">
-            {% else %}
-                <div class="book-placeholder">No cover available</div>
-            {% endif %}
-            <div class="book-info">
-                <div class="title">{{ book.book_title }}</div>
-                <div class="author">{{ book.book_author }}</div>
-            </div>
-        </article>
+        <a class="book-card-link" href="{% url 'book_detail' book.book_id %}">
+            <article class="book-card">
+                {% if book.book_cover %}
+                    <img src="{{ book.book_cover.url }}" alt="{{ book.book_title }}">
+                {% else %}
+                    <div class="book-placeholder">No cover available</div>
+                {% endif %}
+                <div class="book-info">
+                    <div class="title">{{ book.book_title }}</div>
+                    <div class="author">{{ book.book_author }}</div>
+                </div>
+            </article>
+        </a>
         {% endfor %}
     </div>
     <div class="display_cycle-nav">
-        <button class="display_cycle-button" id="prev" type="button">&#10094;</button>
-        <button class="display_cycle-button" id="next" type="button">&#10095;</button>
+        <button class="display_cycle-button" type="button" data-dir="prev">&#10094;</button>
+        <button class="display_cycle-button" type="button" data-dir="next">&#10095;</button>
     </div>
 </div>
 {% else %}
@@ -168,45 +181,54 @@
 {% endif %}
 
 <script>
-const track = document.getElementById('display-cycle-track');
-const cards = document.querySelectorAll('.book-card');
-const nextButton = document.getElementById('next');
-const prevButton = document.getElementById('prev');
-const visible = 3;
-let currentIndex = 0;
+const display = document.querySelector('.book_display');
+if (display) {
+    const track = display.querySelector('[data-track]');
+    const cards = Array.from(track ? track.querySelectorAll('.book-card') : []);
+    const nextButton = display.querySelector('[data-dir="next"]');
+    const prevButton = display.querySelector('[data-dir="prev"]');
+    const visible = 3;
+    let currentIndex = 0;
 
-function updateDisplayCycle() {
-    if (!cards.length) return;
-    const cardWidth = cards[0].offsetWidth;
-    const gap = 16;
-    const translateX = currentIndex * (cardWidth + gap);
-    track.style.transform = `translateX(-${translateX}px)`;
+    function getMaxDisplayIndex() {
+        return Math.max(0, cards.length - visible);
+    }
+
+    function updateDisplayCycle() {
+        if (!cards.length || !track) return;
+        const cardWidth = cards[0].offsetWidth;
+        const gap = 16;
+        const translateX = currentIndex * (cardWidth + gap);
+        track.style.transform = `translateX(-${translateX}px)`;
+    }
+
+    if (nextButton) {
+        nextButton.onclick = () => {
+            const maxIndex = getMaxDisplayIndex();
+            currentIndex = currentIndex < maxIndex ? currentIndex + 1 : 0;
+            updateDisplayCycle();
+        };
+    }
+
+    if (prevButton) {
+        prevButton.onclick = () => {
+            const maxIndex = getMaxDisplayIndex();
+            currentIndex = currentIndex > 0 ? currentIndex - 1 : maxIndex;
+            updateDisplayCycle();
+        };
+    }
+
+    if (cards.length > visible) {
+        setInterval(() => {
+            const maxIndex = getMaxDisplayIndex();
+            currentIndex = currentIndex < maxIndex ? currentIndex + 1 : 0;
+            updateDisplayCycle();
+        }, 5000);
+    }
+
+    window.addEventListener('resize', updateDisplayCycle);
+    updateDisplayCycle();
 }
-
-function getMaxDisplayIndex() {
-    return Math.max(0, cards.length - visible);
-}
-
-nextButton.onclick = () => {
-    const maxIndex = getMaxDisplayIndex();
-    currentIndex = currentIndex < maxIndex ? currentIndex + 1 : 0;
-    updateDisplayCycle();
-};
-
-prevButton.onclick = () => {
-    const maxIndex = getMaxDisplayIndex();
-    currentIndex = currentIndex > 0 ? currentIndex - 1 : maxIndex;
-    updateDisplayCycle();
-};
-
-setInterval(() => {
-    const maxIndex = getMaxDisplayIndex();
-    currentIndex = currentIndex < maxIndex ? currentIndex + 1 : 0;
-    updateDisplayCycle();
-}, 5000); // Auto scroll cycle every 5 seconds.
-
-window.addEventListener('resize', updateDisplayCycle);
-updateDisplayCycle();
 </script>
 {% endblock %}
 {% block section_bottom %}

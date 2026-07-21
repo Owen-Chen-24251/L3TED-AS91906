@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect
+from collections import defaultdict
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.exceptions import ValidationError
 from .forms import ContactForm
@@ -6,7 +7,7 @@ from .models import Book, Student
 
 # Create your views here.
 def home(request):
-    all_books = Book.objects.all()
+    all_books = Book.objects.select_related('genre_id').all().order_by('book_title')
     return render(request, 'home.html', {'books': all_books})
 
 def aboutus(request):
@@ -20,8 +21,24 @@ def aboutus(request):
     return render(request, 'aboutus.html', {'form': form})
 
 def books(request):
-    all_books = Book.objects.all()
-    return render(request, 'books.html', {'books': all_books})
+    books = Book.objects.select_related('genre_id').all().order_by('genre_id__genre_name', 'book_title')
+    books_by_genre = defaultdict(list)
+
+    for book in books:
+        genre_name = book.genre_id.genre_name if book.genre_id else 'Other'
+        books_by_genre[genre_name].append(book)
+
+    genre_sections = [
+        {'name': genre_name, 'books': book_list}
+        for genre_name, book_list in books_by_genre.items()
+    ]
+
+    return render(request, 'books.html', {'genre_sections': genre_sections})
+
+
+def book_detail(request, book_id):
+    book = get_object_or_404(Book, book_id=book_id)
+    return render(request, 'book_detail.html', {'book': book})
 
 def register(request):
     if request.method == 'POST':

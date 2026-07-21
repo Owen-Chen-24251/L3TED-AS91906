@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block section_top %}
+<h2>{{ book.book_title }}</h2>
+<p>Discover more details about this book below.</p>
+{% endblock %}
+
+{% block section_middle %}
+<style>
+    .detail-card {
+        background: white;
+        color: #1a2330;
+        border-radius: 20px;
+        padding: 24px;
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 24px;
+        box-shadow: 0 16px 38px rgba(0,0,0,0.12);
+    }
+
+    .detail-cover {
+        width: 100%;
+        height: 320px;
+        object-fit: cover;
+        border-radius: 14px;
+        background: #f2f2f2;
+    }
+
+    .detail-placeholder {
+        width: 100%;
+        height: 320px;
+        display: grid;
+        place-items: center;
+        background: #f2f2f2;
+        color: #666;
+        border-radius: 14px;
+    }
+
+    .detail-info h3 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        font-size: 1.4rem;
+    }
+
+    .detail-info p {
+        margin: 8px 0;
+        line-height: 1.6;
+    }
+
+    .detail-btn {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 10px 16px;
+        background: #6cb3e0;
+        color: white;
+        border-radius: 999px;
+        font-weight: 600;
+    }
+
+    @media (max-width: 800px) {
+        .detail-card {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="detail-card">
+    {% if book.book_cover %}
+        <img class="detail-cover" src="{{ book.book_cover.url }}" alt="{{ book.book_title }}">
+    {% else %}
+        <div class="detail-placeholder">No cover available</div>
+    {% endif %}
+
+    <div class="detail-info">
+        <h3>{{ book.book_title }}</h3>
+        <p><strong>Author:</strong> {{ book.book_author }}</p>
+        <p><strong>Genre:</strong> {{ book.genre_id.genre_name|default:'Other' }}</p>
+        <p><strong>Copies available:</strong> {{ book.book_copies_available }}</p>
+        <p>There is no book details right now. Will fix in the future.</p>
+        <a class="detail-btn" href="{% url 'books' %}">Back to books</a>
+    </div>
+</div>
+{% endblock %}
