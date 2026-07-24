@@ -10,14 +10,12 @@
         max-width:980px;
         margin:0 auto;
     }
-
     .display_cycle{
         display:flex;
         gap:16px;
         transition:transform 0.45s ease;
         will-change:transform;
     }
-
     .book-card-link {
         display:block;
         flex:0 0 calc((100% - 32px) / 3);
@@ -26,23 +24,20 @@
         color:inherit;
         text-decoration:none;
     }
-
     .book-card{
         height:100%;
         background:white;
-        border-radius:18px;
+        border-radius:20px;
         overflow:hidden;
         box-shadow:0 14px 28px rgba(0,0,0,0.12);
         border:1px solid rgba(0,0,0,0.08);
     }
-
     .book-card img{
         width:100%;
         height:280px;
         object-fit:cover;
         display:block;
     }
-
     .book-placeholder{
         width:100%;
         height:280px;
@@ -50,15 +45,13 @@
         place-items:center;
         background:#f5f5f5;
         color:#555;
-        font-size:0.95rem;
+        font-size:1rem;
         padding:1rem;
         text-align:center;
     }
-
     .book-info{
         padding:16px;
     }
-
     .title{
         color:#111;
         font-size:1rem;
@@ -66,13 +59,11 @@
         margin-bottom:6px;
         line-height:1.35;
     }
-
     .author{
         color:#6a7280;
         font-size:0.92rem;
         line-height:1.4;
     }
-
     .display_cycle-nav{
         position:absolute;
         top:50%;
@@ -83,7 +74,6 @@
         transform:translateY(-50%);
         pointer-events:none;
     }
-
     .display_cycle-button{
         pointer-events:auto;
         width:42px;
@@ -98,31 +88,25 @@
         place-items:center;
         box-shadow:0 10px 22px rgba(0,0,0,0.18);
     }
-
     .display_cycle-button:hover{
         background:#5d2c91;
     }
-
     .genre-section{
         margin-bottom:36px;
     }
-
     .section-heading h2{
         margin-bottom:6px;
         color:white;
     }
-
     .section-heading p{
         color:#d9d9d9;
         max-width:680px;
         margin-bottom:18px;
     }
-
     .no-books{
         color:#fff;
         margin-top:18px;
     }
-
     @media (max-width: 960px) {
         .book-card-link{
             flex:0 0 calc(50% - 8px);
@@ -130,21 +114,19 @@
             min-width:calc(50% - 8px);
         }
     }
-
     @media (max-width: 680px) {
         .book-card-link{
             flex:0 0 100%;
             max-width:100%;
             min-width:100%;
         }
-
         .carousel-nav {
             display:none;
         }
     }
 </style>
 <h2>Welcome to Alfriston College Library</h2>
-<p>This is the home page information (Login and Signup button to be created)</p>
+<p>This is the home page information.</p>
 {% endblock %}
 
 {% block section_middle %}
@@ -193,7 +175,6 @@ if (display) {
     function getMaxDisplayIndex() {
         return Math.max(0, cards.length - visible);
     }
-
     function updateDisplayCycle() {
         if (!cards.length || !track) return;
         const cardWidth = cards[0].offsetWidth;
@@ -201,7 +182,6 @@ if (display) {
         const translateX = currentIndex * (cardWidth + gap);
         track.style.transform = `translateX(-${translateX}px)`;
     }
-
     if (nextButton) {
         nextButton.onclick = () => {
             const maxIndex = getMaxDisplayIndex();
@@ -209,7 +189,6 @@ if (display) {
             updateDisplayCycle();
         };
     }
-
     if (prevButton) {
         prevButton.onclick = () => {
             const maxIndex = getMaxDisplayIndex();
@@ -217,7 +196,6 @@ if (display) {
             updateDisplayCycle();
         };
     }
-
     if (cards.length > visible) {
         setInterval(() => {
             const maxIndex = getMaxDisplayIndex();
@@ -225,7 +203,6 @@ if (display) {
             updateDisplayCycle();
         }, 5000);
     }
-
     window.addEventListener('resize', updateDisplayCycle);
     updateDisplayCycle();
 }

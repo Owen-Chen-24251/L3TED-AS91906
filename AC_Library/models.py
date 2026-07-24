@@ -16,7 +16,6 @@ class Student(models.Model):
     last_name = models.CharField(max_length = 15, blank=False) # Stores the last name of students, max length of 15.
     school_email = models.EmailField(max_length = 50, blank=False) # Stores the school email of students, max length of 50.
     password = models.CharField(max_length=128, blank=False, default='') # Stores the hashed password for student login.
-    phone_number = models.CharField(max_length=15, blank=True, null=True) # Optional phone number for the student.
     fine_amount = models.DecimalField(max_digits=5, decimal_places=2, default=0.00) # Stores the fine amount for overdue books for each student.
 
     def clean(self): # Clean function to validate the data before saving it to the database.
@@ -68,6 +67,7 @@ class Book(models.Model):
     book_title = models.CharField(max_length=50, blank=False) # Stores the title of the book, max length of 50.
     book_author = models.CharField(max_length=50, blank=False) # Stores the author of the book, max length of 50.
     book_cover = models.ImageField(upload_to='book_covers/', blank=True, null=True) # Stores the cover image of the book.
+    book_description = models.CharField(blank=False, null=True) # Stores a synopsis / summary of the book which will be edited by the librarian (admins).
     book_copies_available = models.IntegerField(default=1) # There will always be at least 1 copy of a book, so default is set to 1.
 
     def __str__(self): # Returns the title and author of the book when data is validated and saved.
