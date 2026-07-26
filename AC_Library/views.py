@@ -1,6 +1,7 @@
 from collections import defaultdict
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.hashers import check_password, make_password
+from django.contrib import messages
 from django.core.exceptions import ValidationError
 from .forms import ContactForm
 from .models import Book, Student
@@ -42,36 +43,61 @@ def book_detail(request, book_id):
 
 def register(request):
     if request.method == 'POST':
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        school_email = request.POST.get('school_email')
-        password = request.POST.get('password')
-        confirm_password = request.POST.get('confirm_password')
-        phone_number = request.POST.get('phone_number')
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        school_email = request.POST.get('school_email', '').strip()
+        password = request.POST.get('password', '')
+        confirm_password = request.POST.get('confirm_password', '')
 
-        if password != confirm_password:
+        errors = {}
+
+        if not first_name:
+            errors['first_name'] = ["First name is required."]
+        elif not first_name.isalpha():
+            errors['first_name'] = ["First name can only contain letters."]
+        elif len(first_name) < 3:
+            errors['first_name'] = ["First name must be at least 3 characters."]
+
+        if not last_name:
+            errors['last_name'] = ["Last name is required."]
+        elif not last_name.isalpha():
+            errors['last_name'] = ["Last name can only contain letters."]
+        elif len(last_name) < 3:
+            errors['last_name'] = ["Last name must be at least 3 characters."]
+
+        if not school_email:
+            errors['school_email'] = ["School email is required."]
+        elif not school_email.endswith("@ac.school.nz"):
+            errors['school_email'] = ["School email must end with '@ac.school.nz'."]
+
+        if not password:
+            errors.setdefault('password', []).append("Password is required.")
+        if not confirm_password:
+            errors.setdefault('confirm_password', []).append("Please confirm your password.")
+        if password and confirm_password and password != confirm_password:
+            errors.setdefault('password', []).append("Passwords do not match.")
+
+        if Student.objects.filter(school_email__iexact=school_email).exists():
+            errors['school_email'] = ["A user with this school email already exists."]
+
+        if errors:
             return render(request, "register.html", {
-                "errors": {
-                    "password": ["Passwords do not match."]
-                },
+                "errors": errors,
                 "first_name": first_name,
                 "last_name": last_name,
                 "school_email": school_email,
-                "phone_number": phone_number,
             })
+
         student = Student(
             first_name=first_name,
             last_name=last_name,
             school_email=school_email,
             password=make_password(password),
-            phone_number=phone_number,
         )
         try:
-            # Runs your model clean() validation
             student.full_clean()
-            # Saves into Student table
             student.save()
-            # Go to login page after success
+            messages.success(request, "Registration successful. Please login to continue.")
             return redirect("login")
         except ValidationError as e:
             return render(request, "register.html", {
@@ -81,30 +107,59 @@ def register(request):
                 "school_email": school_email,
             })
     return render(request, "register.html")
+
 def login(request):
+    if request.session.get('student_id'):
+        return redirect('account')
+
     if request.method == "POST":
-        school_email = request.POST.get("school_email")
-        password = request.POST.get("password")
+        school_email = request.POST.get("school_email", "").strip()
+        password = request.POST.get("password", "")
+
+        errors = {}
+        if not school_email:
+            errors['school_email'] = ["School email is required."]
+        elif not school_email.endswith("@ac.school.nz"):
+            errors['school_email'] = ["School email must end with '@ac.school.nz'."]
+
+        if not password:
+            errors['password'] = ["Password is required."]
+
+        if errors:
+            return render(request, "login.html", {
+                "errors": errors,
+                "school_email": school_email,
+            })
+
         try:
-            # Search Student table using email
-            student = Student.objects.get(school_email__iexact=school_email.strip())
-            # Check password against stored hashed password
+            student = Student.objects.get(school_email__iexact=school_email)
             if check_password(password, student.password):
-                # Store logged-in student details in session
                 request.session['student_id'] = student.student_id
                 request.session['student_name'] = student.first_name
-                # Login successful
-                return redirect("home")
+                return redirect('home')
             else:
-                # Wrong password
                 return render(request, "login.html", {
                     "error": "Incorrect password. Please try again.",
                     "school_email": school_email,
                 })
         except Student.DoesNotExist:
-            # Email does not exist
             return render(request, "login.html", {
                 "error": "Email is not registered.",
                 "school_email": school_email,
             })
+
     return render(request, "login.html")
+
+def logout_view(request):
+    request.session.flush()
+    return redirect('home')
+
+def account(request):
+    student_id = request.session.get('student_id')
+    if not student_id:
+        return redirect('login')
+    student = Student.objects.filter(student_id=student_id).first()
+    if not student:
+        request.session.flush()
+        return redirect('login')
+    return render(request, 'account.html', {'student': student})

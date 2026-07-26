@@ -7,5 +7,7 @@ urlpatterns = [
     path('books/<int:book_id>/', views.book_detail, name='book_detail'), # book detail page opens based on the book id being picked.
     path('aboutus/', views.aboutus, name='aboutus'),
     path('login/', views.login, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('account/', views.account, name='account'),
     path('register/', views.register, name='register'),
 ]

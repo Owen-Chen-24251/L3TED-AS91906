@@ -35,7 +35,8 @@
     .book-card img{
         width:100%;
         height:280px;
-        object-fit:cover;
+        object-fit:contain;
+        background:#f5f5f5;
         display:block;
     }
     .book-placeholder{
@@ -51,18 +52,31 @@
     }
     .book-info{
         padding:16px;
+        display:grid;
+        gap:10px;
     }
     .title{
         color:#111;
-        font-size:1rem;
+        font-size:1.05rem;
         font-weight:700;
-        margin-bottom:6px;
+        margin:0;
         line-height:1.35;
+        display:-webkit-box;
+        -webkit-line-clamp:2;
+        -webkit-box-orient:vertical;
+        overflow:hidden;
     }
     .author{
         color:#6a7280;
-        font-size:0.92rem;
+        font-size:0.95rem;
         line-height:1.4;
+        margin:0;
+    }
+    .copies-text {
+        color:#4d5766;
+        font-size:0.88rem;
+        line-height:1.4;
+        margin-top:6px;
     }
     .display_cycle-nav{
         position:absolute;
@@ -114,6 +128,13 @@
             min-width:calc(50% - 8px);
         }
     }
+    @media (max-width: 760px) {
+        .book-card-link{
+            flex:0 0 100%;
+            max-width:100%;
+            min-width:100%;
+        }
+    }
     @media (max-width: 680px) {
         .book-card-link{
             flex:0 0 100%;
@@ -147,7 +168,10 @@
                 {% endif %}
                 <div class="book-info">
                     <div class="title">{{ book.book_title }}</div>
-                    <div class="author">{{ book.book_author }}</div>
+                    <div class="author">by {{ book.book_author }}</div>
+                    <div class="copies-text">{% if book.book_copies_available == 0 %}
+                        Unavailable{% elif book.book_copies_available == 1 %}Available: 1 copy
+                        {% else %}Available: {{ book.book_copies_available }} copies{% endif %}</div>
                 </div>
             </article>
         </a>
@@ -169,18 +193,25 @@ if (display) {
     const cards = Array.from(track ? track.querySelectorAll('.book-card') : []);
     const nextButton = display.querySelector('[data-dir="next"]');
     const prevButton = display.querySelector('[data-dir="prev"]');
-    const visible = 3;
     let currentIndex = 0;
 
+    function getVisibleCount() {
+        if (!cards.length) return 1;
+        const cardWidth = cards[0].offsetWidth;
+        const gap = 16;
+        return Math.max(1, Math.floor((display.offsetWidth + gap) / (cardWidth + gap)));
+    }
+
     function getMaxDisplayIndex() {
-        return Math.max(0, cards.length - visible);
+        return Math.max(0, cards.length - getVisibleCount());
     }
     function updateDisplayCycle() {
         if (!cards.length || !track) return;
         const cardWidth = cards[0].offsetWidth;
         const gap = 16;
         const translateX = currentIndex * (cardWidth + gap);
-        track.style.transform = `translateX(-${translateX}px)`;
+        const maxTranslate = Math.max(0, track.scrollWidth - display.offsetWidth);
+        track.style.transform = `translateX(-${Math.min(translateX, maxTranslate)}px)`;
     }
     if (nextButton) {
         nextButton.onclick = () => {
@@ -196,7 +227,7 @@ if (display) {
             updateDisplayCycle();
         };
     }
-    if (cards.length > visible) {
+    if (cards.length > getVisibleCount()) {
         setInterval(() => {
             const maxIndex = getMaxDisplayIndex();
             currentIndex = currentIndex < maxIndex ? currentIndex + 1 : 0;

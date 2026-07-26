@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block section_top %}
+<div>
+    <h1>My Account</h1>
+    <p>Welcome back, {{ student.first_name }} {{ student.last_name }}.</p>
+</div>
+{% endblock %}
+
+{% block section_middle %}
+<div style="max-width: 640px; margin: 0 auto; padding: 2rem; background: white; border-radius: 24px; 
+box-shadow: 0 24px 64px rgba(0,0,0,0.08); color: #1a2330;">
+    <h2>Profile details</h2>
+    <dl style="display: grid; gap: 1rem; margin-top: 1rem;">
+        <div><strong>First name</strong><div>{{ student.first_name }}</div></div>
+        <div><strong>Last name</strong><div>{{ student.last_name }}</div></div>
+        <div><strong>School email</strong><div>{{ student.school_email }}</div></div>
+    </dl>
+</div>
+{% endblock %}
+
+{% block section_bottom %}
+<div style="text-align: center; color: white;">
+    <p>Use the navigation above to browse books, update your account, or logout.</p>
+</div>
+{% endblock %}

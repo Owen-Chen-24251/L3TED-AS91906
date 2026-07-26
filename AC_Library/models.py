@@ -14,7 +14,7 @@ class Student(models.Model):
     student_id = models.AutoField(primary_key=True) # Stores the unique ID for each student in the library.
     first_name = models.CharField(max_length = 15, blank=False) # Stores the first name of students, max length of 15.
     last_name = models.CharField(max_length = 15, blank=False) # Stores the last name of students, max length of 15.
-    school_email = models.EmailField(max_length = 50, blank=False) # Stores the school email of students, max length of 50.
+    school_email = models.EmailField(max_length = 50, blank=False, unique=True) # Stores the school email of students, max length of 50.
     password = models.CharField(max_length=128, blank=False, default='') # Stores the hashed password for student login.
     fine_amount = models.DecimalField(max_digits=5, decimal_places=2, default=0.00) # Stores the fine amount for overdue books for each student.
 
@@ -47,6 +47,11 @@ class Student(models.Model):
         if not self.school_email.endswith("@ac.school.nz"): # Checks if the school email ends with "@ac.school.nz".
             raise ValidationError({
                 'school_email': "School email must end with '@ac.school.nz'" # Error message for school email.
+            })
+
+        if Student.objects.filter(school_email__iexact=self.school_email).exclude(pk=self.pk).exists():
+            raise ValidationError({
+                'school_email': ["A user with this school email already exists."]
             })
 
     def __str__(self): # Returns the full name of students when data is validated and saved.
