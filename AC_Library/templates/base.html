@@ -81,11 +81,12 @@
         .site-nav {
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             gap: 1.25rem;
             flex: 1 1 420px;
             min-width: 0;
-            margin: 0 1rem;
+            margin: 0 0 0 0.5rem;
+            padding-left: 0.25rem;
         }
 
         .site-nav a {
@@ -97,6 +98,36 @@
 
         .site-nav a:hover {
             opacity: 0.9;
+        }
+
+        .site-search {
+            display: flex;
+            align-items: center;
+            margin-left: 0.5rem;
+        }
+
+        .site-search form {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .site-search input {
+            border: none;
+            border-radius: 999px;
+            padding: 0.7rem 1rem;
+            min-width: 180px;
+            outline: none;
+        }
+
+        .site-search button {
+            border: none;
+            border-radius: 999px;
+            padding: 0.7rem 1rem;
+            background: rgba(255,255,255,0.25);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
         }
 
         .header-actions {
@@ -185,6 +216,13 @@
                 <a href="/">Home</a>
                 <a href="/aboutus/">About</a>
                 <a href="/books/">Books</a>
+                <div class="site-search">
+                    <form method="get" action="{% url 'books' %}">
+                        <input type="text" name="q" value="{{ search_term|default:'' }}" 
+                        placeholder="Search books" aria-label="Search books">
+                        <button type="submit">Search</button>
+                    </form>
+                </div>
             </nav> 
             {% if request.session.student_id %}
             <div class="header-actions">

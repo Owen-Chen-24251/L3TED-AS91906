@@ -22,7 +22,20 @@ def aboutus(request):
     return render(request, 'aboutus.html', {'form': form})
 
 def books(request):
+    search_term = request.GET.get('q', '').strip()
     books = Book.objects.select_related('genre_id').all().order_by('genre_id__genre_name', 'book_title')
+
+    if search_term:
+        books = books.filter(
+            book_title__icontains=search_term
+        ) | books.filter(
+            book_author__icontains=search_term
+        ) | books.filter(
+            genre_id__genre_name__icontains=search_term
+        )
+
+    books = books.distinct().order_by('genre_id__genre_name', 'book_title')
+
     books_by_genre = defaultdict(list)
 
     for book in books:
@@ -34,7 +47,7 @@ def books(request):
         for genre_name, book_list in books_by_genre.items()
     ]
 
-    return render(request, 'books.html', {'genre_sections': genre_sections})
+    return render(request, 'books.html', {'genre_sections': genre_sections, 'search_term': search_term})
 
 
 def book_detail(request, book_id):
