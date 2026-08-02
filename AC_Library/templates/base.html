@@ -104,6 +104,7 @@
             display: flex;
             align-items: center;
             margin-left: 0.5rem;
+            position: relative;
         }
 
         .site-search form {
@@ -128,6 +129,40 @@
             color: white;
             font-weight: 600;
             cursor: pointer;
+        }
+
+        .site-search-results {
+            position: absolute;
+            top: calc(100% + 0.35rem);
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 12px 30px rgba(26, 35, 48, 0.16);
+            display: none;
+            z-index: 20;
+            overflow: hidden;
+        }
+
+        .site-search-results.show {
+            display: block;
+        }
+
+        .site-search-results a {
+            display: block;
+            padding: 0.7rem 0.9rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .site-search-results a:hover {
+            background: #f4f8fc;
+        }
+
+        .site-search-results .hint {
+            padding: 0.7rem 0.9rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
         }
 
         .header-actions {
@@ -218,10 +253,11 @@
                 <a href="/books/">Books</a>
                 <div class="site-search">
                     <form method="get" action="{% url 'books' %}">
-                        <input type="text" name="q" value="{{ search_term|default:'' }}" 
-                        placeholder="Search books" aria-label="Search books">
+                        <input type="text" id="site-search-input" name="q" value="{{ search_term|default:'' }}" 
+                        placeholder="Search books" aria-label="Search books" autocomplete="off">
                         <button type="submit">Search</button>
                     </form>
+                    <div id="site-search-results" class="site-search-results" aria-live="polite"></div>
                 </div>
             </nav> 
             {% if request.session.student_id %}
@@ -259,5 +295,42 @@
             Susan Impey Library · All Rights Reserved
         </footer>
     </div>
+
+    <script>
+        const searchInput = document.getElementById('site-search-input');
+        const searchResults = document.getElementById('site-search-results');
+
+        if (searchInput && searchResults) {
+            searchInput.addEventListener('input', async function () {
+                const query = this.value.trim();
+
+                if (!query) {
+                    searchResults.innerHTML = '';
+                    searchResults.classList.remove('show');
+                    return;
+                }
+
+                const response = await fetch(`/search-suggestions/?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+
+                if (!data.length) {
+                    searchResults.innerHTML = '<div class="hint">No matching books or genres yet.</div>';
+                    searchResults.classList.add('show');
+                    return;
+                }
+
+                searchResults.innerHTML = data.map(item => `
+                    <a href="${item.url}"><strong>${item.type === 'genre' ? 'Genre:' : 'Books:'}</strong> ${item.label}</a>
+                `).join('');
+                searchResults.classList.add('show');
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+                    searchResults.classList.remove('show');
+                }
+            });
+        }
+    </script>
 </body>
 </html>

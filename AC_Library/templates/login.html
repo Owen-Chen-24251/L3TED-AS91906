@@ -96,6 +96,30 @@
     .register-link a:hover{
         background:#512b81;
     }
+.librarian-login{
+    text-align:center;
+    margin-top:12px;
+}
+    .librarian-login p{
+        margin:0 0 10px;
+        color:#2f2f2f;
+        font-size:0.95rem;
+        font-weight:600;
+    }
+    .librarian-login a{
+        display:inline-block;
+        padding:10px 18px;
+        background:#32174D;
+        color:#fff;
+        font-weight:700;
+        border-radius:999px;
+        text-decoration:none;
+        transition:background 0.2s ease;
+        margin-top:2px;
+    }
+    .librarian-login a:hover{
+        background:#512b81;
+    }
 </style>
 <div class="login-container">
     <h1>Student Login</h1>
@@ -135,6 +159,10 @@
     <div class="register-link">
         <p>Don't have an account?</p>
         <a href="{% url 'register' %}">Register here</a>
+    </div>
+    <div class="librarian-login">
+        <p>Or Alternatively:</p>
+        <a href="{% url 'force_admin_login' %}">Login as Admin</a>
     </div>
 </div>
 {% endblock %}

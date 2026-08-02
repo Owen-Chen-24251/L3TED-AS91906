@@ -1,10 +1,12 @@
+import json
 from collections import defaultdict
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from .forms import ContactForm
-from .models import Book, Student
+from .models import Book, Genre, Student
 
 # Create your views here.
 def home(request):
@@ -20,6 +22,40 @@ def aboutus(request):
     else:
         form = ContactForm()             # Provide a blank form for GET requests
     return render(request, 'aboutus.html', {'form': form})
+
+def search_suggestions(request):
+    query = request.GET.get('q', '').strip()
+    suggestions = []
+
+    if query:
+        books = Book.objects.select_related('genre_id').filter(
+            book_title__icontains=query
+        )[:5]
+        matching_genres = Genre.objects.filter(genre_name__icontains=query)[:5]
+        related_genres = Genre.objects.filter(book__book_title__icontains=query).distinct()[:5]
+
+        for book in books:
+            suggestions.append({
+                'type': 'book',
+                'label': book.book_title,
+                'value': book.book_title,
+                'url': f"/books/{book.book_id}/"
+            })
+
+        seen_genre_ids = set()
+        for genre in list(matching_genres) + list(related_genres):
+            if genre.genre_id in seen_genre_ids:
+                continue
+            seen_genre_ids.add(genre.genre_id)
+            suggestions.append({
+                'type': 'genre',
+                'label': genre.genre_name,
+                'value': genre.genre_name,
+                'url': '/books/?q=' + genre.genre_name
+            })
+
+    return JsonResponse(suggestions, safe=False)
+
 
 def books(request):
     search_term = request.GET.get('q', '').strip()
@@ -52,7 +88,10 @@ def books(request):
 
 def book_detail(request, book_id):
     book = get_object_or_404(Book, book_id=book_id)
-    return render(request, 'book_detail.html', {'book': book})
+    similar_books = Book.objects.select_related('genre_id').filter(
+        genre_id=book.genre_id
+    ).exclude(book_id=book.book_id).order_by('book_title')[:4]
+    return render(request, 'book_detail.html', {'book': book, 'similar_books': similar_books})
 
 def register(request):
     if request.method == 'POST':

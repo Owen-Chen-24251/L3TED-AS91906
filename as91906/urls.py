@@ -15,11 +15,20 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+
+def force_admin_login(request):
+    logout(request)
+    return redirect('/admin/login/')
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('admin-login/', force_admin_login, name='force_admin_login'),
     path('', include('AC_Library.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) # Adds the media URL pattern to serve media files during development.
