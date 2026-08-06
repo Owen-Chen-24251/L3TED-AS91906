@@ -1,12 +1,16 @@
 import json
 from collections import defaultdict
+from datetime import date
+from urllib.parse import quote
+
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
+from django.urls import reverse
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from .forms import ContactForm
-from .models import Book, Genre, Student
+from .models import Book, Genre, Student, Issue
 
 # Create your views here.
 def home(request):
@@ -164,6 +168,8 @@ def login(request):
     if request.session.get('student_id'):
         return redirect('account')
 
+    next_url = request.POST.get('next') or request.GET.get('next', '')
+
     if request.method == "POST":
         school_email = request.POST.get("school_email", "").strip()
         password = request.POST.get("password", "")
@@ -181,6 +187,7 @@ def login(request):
             return render(request, "login.html", {
                 "errors": errors,
                 "school_email": school_email,
+                "next": next_url,
             })
 
         try:
@@ -188,19 +195,24 @@ def login(request):
             if check_password(password, student.password):
                 request.session['student_id'] = student.student_id
                 request.session['student_name'] = student.first_name
+                messages.success(request, "You have successfully signed in.")
+                if next_url.startswith('/'):
+                    return redirect(next_url)
                 return redirect('home')
             else:
                 return render(request, "login.html", {
                     "error": "Incorrect password. Please try again.",
                     "school_email": school_email,
+                    "next": next_url,
                 })
         except Student.DoesNotExist:
             return render(request, "login.html", {
                 "error": "Email is not registered.",
                 "school_email": school_email,
+                "next": next_url,
             })
 
-    return render(request, "login.html")
+    return render(request, "login.html", {"next": next_url})
 
 def logout_view(request):
     request.session.flush()
@@ -215,3 +227,41 @@ def account(request):
         request.session.flush()
         return redirect('login')
     return render(request, 'account.html', {'student': student})
+
+
+def issue_book(request):
+    student_id = request.session.get('student_id')
+    if not student_id:
+        messages.info(request, 'Please sign in to issue a book.')
+        next_url = quote(request.get_full_path(), safe='')
+        return redirect(f"{reverse('login')}?next={next_url}")
+
+    student = get_object_or_404(Student, student_id=student_id)
+    available_books = Book.objects.filter(book_copies_available__gt=0).order_by('book_title')
+    selected_book_id = request.GET.get('book_id')
+    selected_book = available_books.filter(book_id=selected_book_id).first() if selected_book_id else None
+
+    if request.method == 'POST':
+        book_id = request.POST.get('book_id')
+        selected_book = available_books.filter(book_id=book_id).first()
+
+        if not selected_book:
+            messages.error(request, 'That book is not available to issue right now.')
+            return redirect('issue')
+
+        issue = Issue(book_id=selected_book, student_id=student)
+        try:
+            issue.full_clean()
+            issue.save()
+            messages.success(request, f'You have successfully issued {selected_book.book_title}.')
+            return redirect('issue')
+        except ValidationError as e:
+            messages.error(request, e.message)
+            return redirect('issue')
+
+    return render(request, 'issue.html', {
+        'student': student,
+        'available_books': available_books,
+        'selected_book': selected_book,
+        'today': date.today(),
+    })

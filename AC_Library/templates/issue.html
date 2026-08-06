@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block section_top %}
+<div>
+    <h1>Issue a Book</h1>
+    <p>Logged in as {{ student.first_name }} {{ student.last_name }}.</p>
+</div>
+{% endblock %}
+
+{% block section_middle %}
+<div style="max-width: 640px; margin: 0 auto; padding: 2rem; background: white; 
+border-radius: 24px; box-shadow: 0 24px 64px rgba(0,0,0,0.08); color: #1a2330;">
+    <style>
+        .issue-message {
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            color: #1f2937;
+        }
+        .issue-message.error {
+            background: #ffe0e0;
+            border: 1px solid #f5c2c2;
+        }
+        .issue-message.success {
+            background: #e8f7ee;
+            border: 1px solid #c8e6cc;
+        }
+    </style>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="issue-message {% if message.tags == 'error' %}error{% else %}success{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if available_books %}
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: grid; gap: 1rem;">
+                {% if selected_book %}
+                    <input type="hidden" name="book_id" value="{{ selected_book.book_id }}">
+                    <div>
+                        <label for="selected_book" style="display: block; margin-bottom: 0.4rem; font-weight: 600;">Selected book</label>
+                        <input id="selected_book" type="text" value="{{ selected_book.book_title }} by {{ selected_book.book_author }}" readonly style="width: 100%; padding: 0.7rem; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc;">
+                    </div>
+                {% else %}
+                    <div>
+                        <label for="book_id" style="display: block; margin-bottom: 0.4rem; font-weight: 600;">Select a book</label>
+                        <select id="book_id" name="book_id" required style="width: 100%; padding: 0.7rem; border-radius: 10px; border: 1px solid #cbd5e1;">
+                            <option value="">-- Choose a book --</option>
+                            {% for book in available_books %}
+                                <option value="{{ book.book_id }}">{{ book.book_title }} by {{ book.book_author }} ({{ book.book_copies_available }} available)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endif %}
+
+                <div>
+                    <label for="issue_date" style="display: block; margin-bottom: 0.4rem; font-weight: 600;">Issue date</label>
+                    <input id="issue_date" type="text" value="{{ today|date:'Y-m-d' }}" readonly style="width: 100%; padding: 0.7rem; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc;">
+                </div>
+
+                <button type="submit" style="padding: 0.8rem 1.2rem; border: none; border-radius: 999px; background: #2f4d8f; color: white; font-weight: 700; cursor: pointer;">
+                    Issue Book
+                </button>
+            </div>
+        </form>
+    {% else %}
+        <p>No books are currently available to issue.</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block section_bottom %}
+<div style="text-align: center; color: white;">
+    <p><a href="{% url 'account' %}" style="color: white; text-decoration: none;">Back to account</a></p>
+</div>
+{% endblock %}

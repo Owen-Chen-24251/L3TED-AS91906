@@ -1,11 +1,12 @@
 from django.contrib.auth.models import User, Group
 from django.contrib import admin
-from .models import Student, Genre, Book, Issue, Return
+from .models import Student, Genre, Book, Issue, Return, ContactForm
 
 # Register your models here.
 admin.site.register(Student)
 admin.site.register(Genre)
 admin.site.register(Book)
+admin.site.register(ContactForm)
 
 # Saving the models.
 @admin.register(Issue)

@@ -50,6 +50,17 @@
         color: white;
         border-radius: 999px;
         font-weight: 600;
+        text-decoration: none;
+    }
+    .issue-btn {
+        display:inline-block;
+        margin-top: 12px;
+        padding: 10px 16px;
+        background: #6cb3e0;
+        color: white;
+        border-radius: 999px;
+        font-weight: 600;
+        text-decoration: none;
     }
     .similar-section {
         margin-top: 24px;
@@ -126,6 +137,7 @@
         <p><strong>Copies available:</strong> {{ book.book_copies_available }}</p>
         <p><strong>Book Description:</strong> {{ book.book_description }}</p>
         <a class="detail-btn" href="{% url 'books' %}">Back to books</a>
+        <a class="issue-btn" href="{% url 'issue' %}?book_id={{ book.book_id }}">Issue this book</a>
     </div>
 </div>
 {% endblock %}

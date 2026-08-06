@@ -69,8 +69,8 @@ class Genre(models.Model):
 class Book(models.Model): 
     book_id = models.AutoField(primary_key=True) # Stores the unique ID for each book in the library.
     genre_id = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True) # Only uses genres that are available in Genre class.
-    book_title = models.CharField(max_length=50, blank=False) # Stores the title of the book, max length of 50.
-    book_author = models.CharField(max_length=50, blank=False) # Stores the author of the book, max length of 50.
+    book_title = models.CharField(blank=False) # Stores the title of the book.
+    book_author = models.CharField(blank=False) # Stores the author of the book.
     book_cover = models.ImageField(upload_to='book_covers/', blank=True, null=True) # Stores the cover image of the book.
     book_description = models.CharField(blank=False, null=True) # Stores a synopsis / summary of the book which will be edited by the librarian (admins).
     book_copies_available = models.IntegerField(default=1) # There will always be at least 1 copy of a book, so default is set to 1.

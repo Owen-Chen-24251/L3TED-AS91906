@@ -148,6 +148,7 @@
     {% endif %}
     <form method="POST">
         {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next|default:'' }}">
         <label for="email">School Email</label>
         <input type="email" id="email" name="school_email" value="{{ school_email|default:'' }}" placeholder="student@ac.school.nz" required>
 
