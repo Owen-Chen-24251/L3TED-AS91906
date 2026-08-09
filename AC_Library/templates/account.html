@@ -17,6 +17,47 @@ box-shadow: 0 24px 64px rgba(0,0,0,0.08); color: #1a2330;">
         <div><strong>School email</strong><div>{{ student.school_email }}</div></div>
     </dl>
 </div>
+<div style="max-width: 800px; margin: 1.5rem auto; padding: 1.5rem; background: white; border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.06); color: #1a2330;">
+    <h3>Books currently issued</h3>
+    {% if current_issues %}
+        <table style="width:100%; border-collapse: collapse; margin-top: 0.5rem;">
+            <thead>
+                <tr style="text-align:left; border-bottom:1px solid #eee;">
+                    <th>Title</th>
+                    <th>Issued</th>
+                    <th>Due date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in current_issues %}
+                <tr style="border-bottom:1px solid #f6f6f6;">
+                    <td><a href="{% url 'book_detail' item.book.book_id %}">{{ item.book.book_title }}</a></td>
+                    <td>{{ item.issue_date }}</td>
+                    <td>{{ item.overdue_date }}</td>
+                    <td>{% if item.is_overdue %}<span style="color:#b00020;">Overdue ({{ item.days_overdue }} days)</span>{% else %}Due in {{ item.days_until_due }} days{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No books currently issued.</p>
+    {% endif %}
+
+    <h3 style="margin-top:1.25rem;">Fines</h3>
+    <p style="margin:0.25rem 0 0 0;">Outstanding fines: <strong>${{ fine_amount }}</strong></p>
+
+    <h3 style="margin-top:1.25rem;">Returned / History</h3>
+    {% if past_returns %}
+        <ul style="margin-top:0.5rem;">
+            {% for item in past_returns %}
+                <li>{{ item.book.book_title }} — issued {{ item.issue_date }} (returned)</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No returned books yet.</p>
+    {% endif %}
+</div>
 {% endblock %}
 
 {% block section_bottom %}

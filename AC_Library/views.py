@@ -10,7 +10,7 @@ from django.contrib.auth.hashers import check_password, make_password
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from .forms import ContactForm
-from .models import Book, Genre, Student, Issue
+from .models import Book, Genre, Student, Issue, Return
 
 # Create your views here.
 def home(request):
@@ -226,7 +226,39 @@ def account(request):
     if not student:
         request.session.flush()
         return redirect('login')
-    return render(request, 'account.html', {'student': student})
+    # Gather issues for this student and separate currently issued vs returned
+    issues = Issue.objects.select_related('book_id').filter(student_id=student).order_by('-issue_date')
+
+    current_issues = []
+    past_returns = []
+    today = date.today()
+
+    for issue in issues:
+        # Check if this issue has been returned
+        returned = Return.objects.filter(issue_id=issue).exists()
+        entry = {
+            'issue': issue,
+            'book': issue.book_id,
+            'issue_date': issue.issue_date,
+            'overdue_date': issue.overdue_date,
+        }
+        if returned:
+            past_returns.append(entry)
+        else:
+            # compute days until due (negative if overdue)
+            days_until_due = (issue.overdue_date - today).days
+            entry['days_until_due'] = days_until_due
+            entry['is_overdue'] = days_until_due < 0
+            entry['days_overdue'] = abs(days_until_due) if days_until_due < 0 else 0
+            current_issues.append(entry)
+
+    context = {
+        'student': student,
+        'current_issues': current_issues,
+        'past_returns': past_returns,
+        'fine_amount': student.fine_amount,
+    }
+    return render(request, 'account.html', context)
 
 
 def issue_book(request):
