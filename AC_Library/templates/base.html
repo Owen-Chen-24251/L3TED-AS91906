@@ -209,6 +209,24 @@
             box-shadow: var(--shadow);
         }
 
+        /* Flash message styles */
+        .flash-message {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .flash-message.success {
+            background: #e8f7ee;
+            border: 1px solid #c8e6cc;
+            color: #0b7028;
+        }
+        .flash-message.error {
+            background: #ffeef0;
+            border: 1px solid #f5c2c2;
+            color: #b00020;
+        }
+
         .section-middle {
             background: var(--brand-blue);
             color: white;
@@ -272,6 +290,13 @@
 
         <section class="section-top">
             <div class="section-inner">
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if forloop.last %}
+                            <div class="flash-message {% if message.tags == 'error' %}error{% else %}success{% endif %}">{{ message }}</div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
                 {% block section_top %}
                 {% endblock %}
             </div>

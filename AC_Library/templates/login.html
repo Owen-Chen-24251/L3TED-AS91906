@@ -123,15 +123,7 @@
 </style>
 <div class="login-container">
     <h1>Student Login</h1>
-    {% if messages %}
-    <div class="message-box">
-        <ul style="margin:0;padding-left:20px;text-align:left;">
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% endif %}
+    {# messages moved to base.html to show site-wide #}
     {% if error %}
     <div class="error-box">{{ error }}</div>
     {% endif %}

@@ -10,7 +10,7 @@ from django.contrib.auth.hashers import check_password, make_password
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from .forms import ContactForm
-from .models import Book, Genre, Student, Issue, Return
+from .models import Book, Genre, Student, Issue, Return, ReturnRequest
 
 # Create your views here.
 def home(request):
@@ -195,8 +195,11 @@ def login(request):
             if check_password(password, student.password):
                 request.session['student_id'] = student.student_id
                 request.session['student_name'] = student.first_name
-                messages.success(request, "You have successfully signed in.")
-                if next_url.startswith('/'):
+                # Only show a 'successfully signed in' message when user was redirected
+                # to login (there is a `next` target). If they visited the login page
+                # directly and then navigate elsewhere, avoid showing this message.
+                if next_url and next_url.startswith('/'):
+                    messages.success(request, "You have successfully signed in.")
                     return redirect(next_url)
                 return redirect('home')
             else:
@@ -236,6 +239,8 @@ def account(request):
     for issue in issues:
         # Check if this issue has been returned
         returned = Return.objects.filter(issue_id=issue).exists()
+        # Check for a pending return request
+        pending_request = ReturnRequest.objects.filter(issue_id=issue, processed=False).first()
         entry = {
             'issue': issue,
             'book': issue.book_id,
@@ -250,6 +255,8 @@ def account(request):
             entry['days_until_due'] = days_until_due
             entry['is_overdue'] = days_until_due < 0
             entry['days_overdue'] = abs(days_until_due) if days_until_due < 0 else 0
+            entry['return_pending'] = bool(pending_request)
+            entry['pickup_ready'] = bool(issue.pickup_ready)
             current_issues.append(entry)
 
     context = {
@@ -282,11 +289,13 @@ def issue_book(request):
             return redirect('issue')
 
         issue = Issue(book_id=selected_book, student_id=student)
+        # mark as ready for pickup so librarian/staff know it's waiting
+        issue.pickup_ready = True
         try:
             issue.full_clean()
             issue.save()
-            messages.success(request, f'You have successfully issued {selected_book.book_title}.')
-            return redirect('issue')
+            messages.success(request, f'You have successfully issued {selected_book.book_title}. It is available for pickup in the library.')
+            return redirect('account')
         except ValidationError as e:
             messages.error(request, e.message)
             return redirect('issue')
@@ -297,3 +306,36 @@ def issue_book(request):
         'selected_book': selected_book,
         'today': date.today(),
     })
+
+
+def request_return(request):
+    if request.method != 'POST':
+        return redirect('account')
+
+    student_id = request.session.get('student_id')
+    if not student_id:
+        messages.info(request, 'Please sign in to request a return.')
+        return redirect('login')
+
+    student = get_object_or_404(Student, student_id=student_id)
+    issue_id = request.POST.get('issue_id')
+    issue = get_object_or_404(Issue, issue_id=issue_id)
+
+    if issue.student_id != student:
+        messages.error(request, "That issue does not belong to you.")
+        return redirect('account')
+
+    # already returned?
+    if Return.objects.filter(issue_id=issue).exists():
+        messages.error(request, "This book has already been returned.")
+        return redirect('account')
+
+    # existing pending request?
+    if ReturnRequest.objects.filter(issue_id=issue, processed=False).exists():
+        messages.info(request, "A return request is already pending for this book.")
+        return redirect('account')
+
+    rr = ReturnRequest(issue_id=issue, student_id=student)
+    rr.save()
+    messages.success(request, "Return request submitted. A librarian will confirm when they receive the book.")
+    return redirect('account')
