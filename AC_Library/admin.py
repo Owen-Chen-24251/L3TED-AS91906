@@ -1,11 +1,11 @@
-from django.contrib import admin
-from django.contrib import messages as django_messages
-from django.db.models import F
-from datetime import date, timedelta
+from django.contrib import admin  # Django admin site registration helpers
+from django.contrib import messages as django_messages  # message helper for admin user feedback
+from django.db.models import F  # F expressions for atomic updates
+from datetime import date, timedelta  # date helpers for issue/return dates
 
-from .models import Student, Genre, Book, Issue, Return, ContactForm, ReturnRequest
+from .models import Student, Genre, Book, Issue, Return, ContactForm, ReturnRequest  # local app models
 
-# Register simple models
+# Register simple models with default ModelAdmin behavior for convenience
 admin.site.register(Student)
 admin.site.register(Genre)
 admin.site.register(Book)
@@ -20,7 +20,7 @@ class IssueAdmin(admin.ModelAdmin):
         processed = 0
         skipped = 0
         for issue in queryset.filter(pickup_ready=True).select_related('book_id'):
-            # Try to reserve a copy atomically
+            # Try to reserve a copy atomically using an F() update to avoid race conditions
             updated = Book.objects.filter(pk=issue.book_id.pk, book_copies_available__gt=0).update(book_copies_available=F('book_copies_available') - 1)
             if updated == 0:
                 skipped += 1
@@ -47,6 +47,7 @@ class IssueAdmin(admin.ModelAdmin):
 @admin.register(Return)
 class ReturnAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # Restrict selectable issues to those which do not already have a Return
         if db_field.name == "issue_id":
             kwargs["queryset"] = Issue.objects.filter(return__isnull=True)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -60,8 +61,9 @@ class ReturnRequestAdmin(admin.ModelAdmin):
     def process_requests(self, request, queryset):
         processed = 0
         for req in queryset.filter(processed=False):
-            # create a Return entry which will run the existing fine and copy-update logic
+            # Create a canonical Return row — this reuses Return.save() logic
             Return.objects.create(issue_id=req.issue_id)
+            # Mark the request processed and record when it was actioned
             req.processed = True
             req.processed_at = date.today()
             req.save()

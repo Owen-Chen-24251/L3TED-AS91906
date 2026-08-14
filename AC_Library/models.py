@@ -1,18 +1,18 @@
 # Import necessary modules for the library management system models.
-from django.db import models
-from django.core.exceptions import ValidationError
-from django.db import transaction
-from django.db.models import F
-from datetime import date, datetime, timedelta
-from decimal import Decimal as decimal
+from django.db import models  # Django ORM models base
+from django.core.exceptions import ValidationError  # raised for model validation errors
+from django.db import transaction  # database transaction helpers
+from django.db.models import F  # F expressions for atomic DB updates
+from datetime import date, datetime, timedelta  # date utilities used across models
+from decimal import Decimal as decimal  # Decimal type for monetary/fine calculations
 
 # Function to calculate overdue date for issued books.
-def calculate_overdue_date():
+def calculate_overdue_date():  # compute default overdue date (14 days from today)
     return date.today() + timedelta(days=14) # Default overdue date is 14 days from the day a book is issued.
 
 # Library management system models.
 # Student model to store student information.
-class Student(models.Model):
+class Student(models.Model):  # model representing a student account
     student_id = models.AutoField(primary_key=True) # Stores the unique ID for each student in the library.
     first_name = models.CharField(max_length = 15, blank=False) # Stores the first name of students, max length of 15.
     last_name = models.CharField(max_length = 15, blank=False) # Stores the last name of students, max length of 15.
@@ -61,7 +61,7 @@ class Student(models.Model):
         return f"{self.first_name} {self.last_name}" # Return message.
     
 # Genre model to store categories of books in the library.
-class Genre(models.Model):
+class Genre(models.Model):  # simple genre/category model for books
     genre_id = models.AutoField(primary_key=True) # Stores the unique ID for genres.
     genre_name = models.CharField(max_length=50, blank=False) # Stores the name of the genre, max length of 50.
 
@@ -69,7 +69,7 @@ class Genre(models.Model):
         return self.genre_name # Return message.
 
 # Book model to store information about books in the library.
-class Book(models.Model): 
+class Book(models.Model):  # model representing a book and its metadata
     book_id = models.AutoField(primary_key=True) # Stores the unique ID for each book in the library.
     genre_id = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True) # Only uses genres that are available in Genre class.
     book_title = models.CharField(max_length=255, blank=False) # Stores the title of the book.
@@ -82,7 +82,7 @@ class Book(models.Model):
         return f"'{self.book_title}' by {self.book_author}" # Return message for book title and author.
     
 # Issue model to store information about book issues in the library.
-class Issue(models.Model): 
+class Issue(models.Model):  # model representing a book issue (loan)
     issue_id = models.AutoField(primary_key=True) # Stores the unique ID for each book issue.
     book_id = models.ForeignKey(Book, on_delete=models.CASCADE, null=True) # Only uses books that are available in Book class.
     student_id = models.ForeignKey(Student, on_delete=models.CASCADE, null=True) # Only uses students that are available in Student class.
@@ -106,11 +106,11 @@ class Issue(models.Model):
         # If this is an update where pickup_ready transitions True -> False,
         # this indicates the book was picked up; attempt to decrement copies
         # atomically at that time.
-        if self.pk:
+        if self.pk:  # if PK exists this is an update, try to fetch original
             try:
                 orig = Issue.objects.get(pk=self.pk)
             except Issue.DoesNotExist:
-                orig = None
+                orig = None  # original record not found (concurrent delete or new)
         else:
             orig = None
 
@@ -129,7 +129,7 @@ class Issue(models.Model):
             super().save(*args, **kwargs)
 
 # Return model to store information about book returns in the library.
-class Return(models.Model): 
+class Return(models.Model):  # model representing a returned book
     return_id = models.AutoField(primary_key=True) # Stores the unique ID for each book return.
     issue_id = models.ForeignKey(Issue, on_delete=models.CASCADE, null=True) # Only uses issues that are available in Issue class.
     return_date = models.DateField(default=date.today) # Stores todays date when a book is returned.
@@ -180,11 +180,11 @@ class ReturnRequest(models.Model): # Model to store information about return req
         # records returns regardless of whether an admin used the action
         # or manually toggled the processed flag in the admin form.
         try:
-            orig = None
+            orig = None  # placeholder for existing record lookup
             if self.pk:
-                orig = ReturnRequest.objects.get(pk=self.pk)
+                orig = ReturnRequest.objects.get(pk=self.pk)  # load original if updating
         except ReturnRequest.DoesNotExist:
-            orig = None
+            orig = None  # original not found
 
         # Persist change and create Return when transitioning to processed
         if orig and not orig.processed and self.processed:
