@@ -34,15 +34,20 @@
 {% if genre_sections %}
     {% if search_term %}
         <div style="max-width:920px;margin:0 auto 12px;display:flex;justify-content:flex-end;">
-            <a href="{% url 'books' %}" class="genre-button" style="background:#2f4d8f;color:white;">Clear filter</a>
+            <a href="{% url 'books' %}" class="genre-button" style="background:#2f4d8f;
+            color:white;">Clear filter</a>
         </div>
     {% endif %}
     <div class="genre-buttons">
         {% for section in genre_sections %}
             {% if search_term and search_term|lower == section.name|lower %}
-                <a class="genre-button active" href="{% url 'books' %}?q={{ section.name|urlencode }}">{{ section.name }}</a>
+                <a class="genre-button active" href="{% url 'books' %}?q={{ section.name|urlencode }}">
+                    {{ section.name }}
+                </a>
             {% else %}
-                <a class="genre-button" href="{% url 'books' %}?q={{ section.name|urlencode }}">{{ section.name }}</a>
+                <a class="genre-button" href="{% url 'books' %}?q={{ section.name|urlencode }}">
+                    {{ section.name }}
+                </a>
             {% endif %}
         {% endfor %}
     </div>

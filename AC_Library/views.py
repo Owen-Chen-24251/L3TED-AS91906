@@ -21,6 +21,7 @@ def aboutus(request):  # about/contact page; handles contact form submissions
         form = ContactForm(request.POST)  # bind POST data to form
         if form.is_valid():  # validate form fields
             form.save()  # persistent contact message
+            messages.success(request, "Your form has been submitted. The librarian will review it shortly and be in touch.")
             return redirect('aboutus')  # redirect back to avoid resubmission
     else:
         form = ContactForm()  # empty form for GET
@@ -112,6 +113,8 @@ def register(request):  # registration view for new students
             errors['first_name'] = ["First name can only contain letters."]
         elif len(first_name) < 3:
             errors['first_name'] = ["First name must be at least 3 characters."]
+        elif len(first_name) > 15:
+            errors['first_name'] = [f"First name must be 15 characters or fewer. (it has {len(first_name)})"]
 
         if not last_name:
             errors['last_name'] = ["Last name is required."]
@@ -119,6 +122,8 @@ def register(request):  # registration view for new students
             errors['last_name'] = ["Last name can only contain letters."]
         elif len(last_name) < 3:
             errors['last_name'] = ["Last name must be at least 3 characters."]
+        elif len(last_name) > 15:
+            errors['last_name'] = [f"Last name must be 15 characters or fewer. (it has {len(last_name)})"]
         # Validate school email
         if not school_email:
             errors['school_email'] = ["School email is required."]
@@ -193,12 +198,14 @@ def login(request):  # login view handling authentication and session
             if check_password(password, student.password):  # verify password
                 request.session['student_id'] = student.student_id  # persist login
                 request.session['student_name'] = student.first_name
+                welcome_message = f"Signed in successfully, welcome {student.first_name}!"
                 # Only show a 'successfully signed in' message when user was redirected
                 # to login (there is a `next` target). If they visited the login page
                 # directly and then navigate elsewhere, avoid showing this message.
                 if next_url and next_url.startswith('/'):
-                    messages.success(request, "You have successfully signed in.")
+                    messages.success(request, welcome_message)
                     return redirect(next_url)
+                messages.success(request, welcome_message)
                 return redirect('home')
             else: # incorrect password
                 return render(request, "login.html", {

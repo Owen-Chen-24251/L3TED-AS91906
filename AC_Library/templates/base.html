@@ -13,33 +13,27 @@
             --text-muted: #5f6c7a;
             --shadow: 0 18px 45px rgba(26, 35, 48, 0.08);
         }
-
         * {
             box-sizing: border-box;
         }
-
         html {
             scroll-behavior: smooth;
         }
-
         body {
             margin: 0;
             font-family: Inter, "Segoe UI", system-ui, sans-serif;
             color: var(--text-dark);
             background: #eef4fa;
         }
-
         a {
             color: inherit;
             text-decoration: none;
         }
-
         .page-shell {
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
-
         .site-header {
             background: var(--brand-blue);
             padding: 1rem 2rem;
@@ -48,14 +42,12 @@
             justify-content: space-between;
             gap: 1rem;
         }
-
         .brand-row {
             display: flex;
             align-items: center;
             gap: 1rem;
             min-width: 0;
         }
-
         .brand-icon {
             width: 44px;
             height: 44px;
@@ -66,7 +58,6 @@
             color: white;
             font-weight: 700;
         }
-
         .brand-title {
             min-width: 140px;
             padding: 0.55rem 1rem;
@@ -77,7 +68,6 @@
             font-weight: 600;
             letter-spacing: 0.01em;
         }
-
         .site-nav {
             display: flex;
             align-items: center;
@@ -88,31 +78,26 @@
             margin: 0 0 0 0.5rem;
             padding-left: 0.25rem;
         }
-
         .site-nav a {
             color: white;
             font-weight: 600;
             letter-spacing: 0.01em;
             white-space: nowrap;
         }
-
         .site-nav a:hover {
             opacity: 0.9;
         }
-
         .site-search {
             display: flex;
             align-items: center;
             margin-left: 0.5rem;
             position: relative;
         }
-
         .site-search form {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
-
         .site-search input {
             border: none;
             border-radius: 999px;
@@ -120,7 +105,6 @@
             min-width: 180px;
             outline: none;
         }
-
         .site-search button {
             border: none;
             border-radius: 999px;
@@ -130,7 +114,6 @@
             font-weight: 600;
             cursor: pointer;
         }
-
         .site-search-results {
             position: absolute;
             top: calc(100% + 0.35rem);
@@ -143,34 +126,28 @@
             z-index: 20;
             overflow: hidden;
         }
-
         .site-search-results.show {
             display: block;
         }
-
         .site-search-results a {
             display: block;
             padding: 0.7rem 0.9rem;
             color: var(--text-dark);
             font-weight: 500;
         }
-
         .site-search-results a:hover {
             background: #f4f8fc;
         }
-
         .site-search-results .hint {
             padding: 0.7rem 0.9rem;
             color: var(--text-muted);
             font-size: 0.9rem;
         }
-
         .header-actions {
             display: flex;
             align-items: center;
             gap: 0.75rem;
         }
-
         .header-action {
             padding: 0.8rem 1.2rem;
             border-radius: 999px;
@@ -179,15 +156,12 @@
             border: 1px solid rgba(255,255,255,0.18);
             font-weight: 600;
         }
-
         .header-action-user {
             background: rgba(255,255,255,0.18);
         }
-
         .header-action-logout {
             background: rgba(255,255,255,0.26);
         }
-
         .section-top,
         .section-middle,
         .section-bottom {
@@ -196,19 +170,16 @@
             display: flex;
             justify-content: center;
         }
-
         .section-inner {
             width: min(1200px, calc(100% - 1rem));
             margin: 0 auto;
             padding: 0 1rem;
             min-height: 220px;
         }
-
         .section-top {
             background: rgba(255, 255, 255, 0.92);
             box-shadow: var(--shadow);
         }
-
         /* Flash message styles */
         .flash-message {
             padding: 12px 16px;
@@ -226,24 +197,20 @@
             border: 1px solid #f5c2c2;
             color: #b00020;
         }
-
         .section-middle {
             background: var(--brand-blue);
             color: white;
         }
-
         .section-bottom {
             background: rgba(255, 255, 255, 0.95);
             box-shadow: var(--shadow);
         }
-
         footer {
             padding: 1.25rem 2rem;
             text-align: center;
             color: var(--text-muted);
             font-size: 0.95rem;
         }
-
         @media (max-width: 900px) {
             .site-header {
                 flex-wrap: wrap;
@@ -293,7 +260,8 @@
                 {% if messages %}
                     {% for message in messages %}
                         {% if forloop.last %}
-                            <div class="flash-message {% if message.tags == 'error' %}error{% else %}success{% endif %}">{{ message }}</div>
+                            <div class="flash-message {% if message.tags == 'error' %}
+                            error{% else %}success{% endif %}">{{ message }}</div>
                         {% endif %}
                     {% endfor %}
                 {% endif %}
@@ -345,7 +313,8 @@
                 }
 
                 searchResults.innerHTML = data.map(item => `
-                    <a href="${item.url}"><strong>${item.type === 'genre' ? 'Genre:' : 'Books:'}</strong> ${item.label}</a>
+                    <a href="${item.url}"><strong>${item.type === 'genre' ? 'Genre:' : 'Books:'}</strong> 
+                    ${item.label}</a>
                 `).join('');
                 searchResults.classList.add('show');
             });

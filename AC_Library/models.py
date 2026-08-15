@@ -36,6 +36,10 @@ class Student(models.Model):  # model representing a student account
             raise ValidationError({
                 'first_name': "First name must be at least 3 characters." # Error message for first name.
             })
+        if len(self.first_name) > 15:  # Show an exact field-specific length error instead of Django's default generic one.
+            raise ValidationError({
+                'first_name': f"First name must be 15 characters or fewer. (it has {len(self.first_name)})"
+            })
         # Validates last name.
         if not self.last_name.isalpha(): # Checks if the last name contains only letters (alphabet).
             raise ValidationError({
@@ -44,6 +48,10 @@ class Student(models.Model):  # model representing a student account
         if len(self.last_name) < 3: # Checks if the last name is less than 3 characters long.
             raise ValidationError({
                 'last_name': "Last name must be at least 3 characters." # Error message for last name.
+            })
+        if len(self.last_name) > 15:  # Show an exact field-specific length error instead of Django's default generic one.
+            raise ValidationError({
+                'last_name': f"Last name must be 15 characters or fewer. (it has {len(self.last_name)})"
             })
         # Validate email by making sure it ends with the correct domain.
         if not self.school_email.endswith("@ac.school.nz"): # Checks if the school email ends with "@ac.school.nz".

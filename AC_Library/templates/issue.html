@@ -35,20 +35,26 @@ border-radius: 24px; box-shadow: 0 24px 64px rgba(0,0,0,0.08); color: #1a2330;">
                 {% if selected_book %}
                     <input type="hidden" name="book_id" value="{{ selected_book.book_id }}">
                     <div>
-                        <label for="selected_book" style="display: block; margin-bottom: 0.4rem; font-weight: 600;">
+                        <label for="selected_book" style="display: block; 
+                        margin-bottom: 0.4rem; font-weight: 600;">
                             Selected book
                         </label>
-                        <input id="selected_book" type="text" value="{{ selected_book.book_title }} by {{ selected_book.book_author }}" 
-                        readonly style="width: 100%; padding: 0.7rem; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc;">
+                        <input id="selected_book" type="text" value="
+                        {{ selected_book.book_title }} by {{ selected_book.book_author }}" 
+                        readonly style="width: 100%; padding: 0.7rem; border-radius: 10px; 
+                        border: 1px solid #cbd5e1; background: #f8fafc;">
                     </div>
                 {% else %}
                     <div>
-                        <label for="book_id" style="display: block; margin-bottom: 0.4rem; font-weight: 600;">Select a book</label>
-                        <select id="book_id" name="book_id" required style="width: 100%; padding: 0.7rem; border-radius: 10px; border: 1px solid #cbd5e1;">
+                        <label for="book_id" style="display: block; margin-bottom: 0.4rem; 
+                        font-weight: 600;">Select a book</label>
+                        <select id="book_id" name="book_id" required style="width: 100%; 
+                        padding: 0.7rem; border-radius: 10px; border: 1px solid #cbd5e1;">
                             <option value="">-- Choose a book --</option>
                             {% for book in available_books %}
                                 <option value="{{ book.book_id }}">
-                                    {{ book.book_title }} by {{ book.book_author }} ({{ book.book_copies_available }} available)
+                                    {{ book.book_title }} by {{ book.book_author }} 
+                                    ({{ book.book_copies_available }} available)
                                 </option>
                             {% endfor %}
                         </select>
@@ -56,12 +62,15 @@ border-radius: 24px; box-shadow: 0 24px 64px rgba(0,0,0,0.08); color: #1a2330;">
                 {% endif %}
 
                 <div>
-                    <label for="issue_date" style="display: block; margin-bottom: 0.4rem; font-weight: 600;">Issue date</label>
-                    <input id="issue_date" type="text" value="{{ today|date:'Y-m-d' }}" readonly style="width: 100%; padding: 0.7rem; 
+                    <label for="issue_date" style="display: block; 
+                    margin-bottom: 0.4rem; font-weight: 600;">Issue date</label>
+                    <input id="issue_date" type="text" value="{{ today|date:'Y-m-d' }}" 
+                    readonly style="width: 100%; padding: 0.7rem; 
                     border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc;">
                 </div>
 
-                <button type="submit" style="padding: 0.8rem 1.2rem; border: none; border-radius: 999px; background: #2f4d8f; 
+                <button type="submit" style="padding: 0.8rem 1.2rem; border: none; 
+                border-radius: 999px; background: #2f4d8f; 
                 color: white; font-weight: 700; cursor: pointer;">
                     Issue Book
                 </button>

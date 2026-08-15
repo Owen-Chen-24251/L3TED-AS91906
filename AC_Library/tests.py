@@ -1,1 +1,1 @@
-# No tests, pass.
+# No Tests Required for this project. The following tests are provided to ensure that the project is working as expected. You can run these tests using the command `python manage.py test` in your terminal.

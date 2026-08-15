@@ -5,7 +5,8 @@
     <h1>My Account</h1>
     <p>Welcome back, {{ student.first_name }} {{ student.last_name }}.</p>
 </div>
-    <div style="max-width: 640px; margin: 1rem auto 0; padding: 1.5rem; background: white; border-radius: 12px; 
+    <div style="max-width: 640px; margin: 1rem auto 0; padding: 1.5rem; background: white; 
+    border-radius: 12px; 
     box-shadow: 0 12px 32px rgba(0,0,0,0.06); color: #1a2330;">
         <h2>Profile details</h2>
         <dl style="display: grid; gap: 1rem; margin-top: 1rem;">
@@ -17,7 +18,8 @@
 {% endblock %}
 
 {% block section_middle %}
-<div style="max-width: 800px; margin: 1.5rem auto; padding: 1.5rem; background: white; border-radius: 12px; 
+<div style="max-width: 800px; margin: 1.5rem auto; padding: 1.5rem; background: white; 
+border-radius: 12px; 
 box-shadow: 0 12px 32px rgba(0,0,0,0.06); color: #1a2330;">
     {# messages moved to base.html to show site-wide #}
     <h3>Books currently issued</h3>
@@ -56,7 +58,8 @@ box-shadow: 0 12px 32px rgba(0,0,0,0.06); color: #1a2330;">
                                 <form method="post" action="{% url 'request_return' %}">
                                     {% csrf_token %}
                                     <input type="hidden" name="issue_id" value="{{ item.issue.issue_id }}">
-                                    <button type="submit" style="background:#2f4d8f;color:white;padding:6px 10px;border-radius:6px;border:none;">Request return</button>
+                                    <button type="submit" style="background:#2f4d8f;color:white;
+                                    padding:6px 10px;border-radius:6px;border:none;">Request return</button>
                                 </form>
                             {% endif %}
                         </td>
@@ -85,7 +88,8 @@ box-shadow: 0 12px 32px rgba(0,0,0,0.06); color: #1a2330;">
 {% endblock %}
 
 {% block section_bottom %}
-<div style="max-width:980px; margin:1.5rem auto; padding:1rem; color:#ffffff; background:#2f4d8f; border-radius:10px;">
+<div style="max-width:980px; margin:1.5rem auto; padding:1rem; color:#ffffff; background:#2f4d8f; 
+border-radius:10px;">
     <h4 style="margin:0 0 0.5rem 0;">Borrowing rules & library notice</h4>
     <ul style="text-align:left; margin:0 0 0.5rem 1.25rem;">
         <li>Loan period: 14 days. Renewals are by librarian approval only.</li>
@@ -93,6 +97,7 @@ box-shadow: 0 12px 32px rgba(0,0,0,0.06); color: #1a2330;">
         <li>Please keep books in good condition; replacement or repair fees may apply.</li>
         <li>Maximum of 5 active loans per student unless approved by staff.</li>
     </ul>
-    <p style="margin:0;">Library hours: Mon–Fri 8:30–15:30. For assistance, <a href="{% url 'aboutus' %}" style="color:#ffd">contact the library</a>.</p>
+    <p style="margin:0;">Library hours: Mon–Fri 8:30–15:30. For assistance, <a href="{% url 'aboutus' %}" 
+        style="color:#ffd">contact the library</a>.</p>
 </div>
 {% endblock %}
