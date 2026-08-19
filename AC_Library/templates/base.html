@@ -24,6 +24,7 @@
             font-family: Inter, "Segoe UI", system-ui, sans-serif;
             color: var(--text-dark);
             background: #eef4fa;
+            overflow-wrap: anywhere;
         }
         a {
             color: inherit;
@@ -41,6 +42,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 1rem;
+            flex-wrap: wrap;
         }
         .brand-row {
             display: flex;
@@ -77,6 +79,7 @@
             min-width: 0;
             margin: 0 0 0 0.5rem;
             padding-left: 0.25rem;
+            flex-wrap: wrap;
         }
         .site-nav a {
             color: white;
@@ -102,7 +105,8 @@
             border: none;
             border-radius: 999px;
             padding: 0.7rem 1rem;
-            min-width: 180px;
+            width: min(260px, 100%);
+            min-width: 0;
             outline: none;
         }
         .site-search button {
@@ -113,6 +117,8 @@
             color: white;
             font-weight: 600;
             cursor: pointer;
+            white-space: nowrap;
+            flex: 0 0 auto;
         }
         .site-search-results {
             position: absolute;
@@ -166,7 +172,7 @@
         .section-middle,
         .section-bottom {
             width: 100%;
-            padding: 5rem 0;
+            padding: clamp(2.5rem, 6vw, 5rem) 0;
             display: flex;
             justify-content: center;
         }
@@ -174,7 +180,7 @@
             width: min(1200px, calc(100% - 1rem));
             margin: 0 auto;
             padding: 0 1rem;
-            min-height: 220px;
+            min-height: 0;
         }
         .section-top {
             background: rgba(255, 255, 255, 0.92);
@@ -221,6 +227,38 @@
                 order: 3;
                 width: 100%;
                 justify-content: center;
+            }
+            .header-actions {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            .section-inner {
+                min-height: 0;
+            }
+        }
+        @media (max-width: 600px) {
+            .site-header {
+                padding: 1rem;
+            }
+            .brand-row,
+            .site-nav,
+            .site-search form {
+                width: 100%;
+                justify-content: center;
+            }
+            .site-search {
+                width: 100%;
+                margin-left: 0;
+            }
+            .site-search input {
+                flex: 1 1 auto;
+            }
+            .section-inner {
+                width: 100%;
+                padding: 0 0.75rem;
+            }
+            footer {
+                padding: 1rem;
             }
         }
     </style>

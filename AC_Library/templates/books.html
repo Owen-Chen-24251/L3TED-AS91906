@@ -6,11 +6,19 @@
 
 {% block section_middle %}
 <style>
+    .section-top,
+    .section-middle,
+    .section-bottom {
+        padding: clamp(2rem, 4vw, 3.5rem) 0;
+    }
+    .section-inner {
+        width: min(1400px, calc(100% - 2rem));
+    }
     .genre-buttons {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
         gap: 12px;
-        max-width: 920px;
+        max-width: 1100px;
         margin: 0 auto;
     }
     .genre-button {
@@ -33,7 +41,7 @@
 
 {% if genre_sections %}
     {% if search_term %}
-        <div style="max-width:920px;margin:0 auto 12px;display:flex;justify-content:flex-end;">
+        <div style="max-width:1100px;margin:0 auto 12px;display:flex;justify-content:flex-end;">
             <a href="{% url 'books' %}" class="genre-button" style="background:#2f4d8f;
             color:white;">Clear filter</a>
         </div>

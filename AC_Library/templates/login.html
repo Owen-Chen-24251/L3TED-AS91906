@@ -9,12 +9,13 @@
 {% block section_middle %}
 <style>
 .login-container{
-    max-width:420px;
+    width:min(420px, 100%);
     margin:40px auto;
     background:white;
     padding:34px;
     border-radius:14px;
     box-shadow:0 20px 40px rgba(0,0,0,0.12);
+    overflow-wrap:break-word;
 }
 .login-container h1{
     text-align:center;
@@ -35,6 +36,26 @@
     border:1px solid #ccc;
     border-radius:10px;
     font-size:1rem;
+}
+.password-field{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:8px;
+}
+.password-field input{
+    margin-top:0;
+}
+.password-toggle{
+    flex:0 0 auto;
+    width:auto !important;
+    margin:0 !important;
+    padding:10px 12px !important;
+    background:#eee !important;
+    color:#32174D !important;
+    border:1px solid #ccc !important;
+    border-radius:10px !important;
+    font-size:0.9rem !important;
 }
 .login-container input:focus{
     outline:none;
@@ -146,7 +167,10 @@
         placeholder="student@ac.school.nz" required>
 
         <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="Enter password" required>
+        <div class="password-field">
+            <input type="password" id="password" name="password" placeholder="Enter password" required>
+            <button type="button" class="password-toggle" data-password-target="password" aria-label="Show password">Show</button>
+        </div>
 
         <button type="submit">Login</button>
     </form>
@@ -159,4 +183,15 @@
         <a href="{% url 'force_admin_login' %}">Login as Admin</a>
     </div>
 </div>
+<script>
+document.querySelectorAll('.password-toggle').forEach(function (button) {
+    button.addEventListener('click', function () {
+        const passwordInput = document.getElementById(button.dataset.passwordTarget);
+        const isHidden = passwordInput.type === 'password';
+        passwordInput.type = isHidden ? 'text' : 'password';
+        button.textContent = isHidden ? 'Hide' : 'Show';
+        button.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+    });
+});
+</script>
 {% endblock %}

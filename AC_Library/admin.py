@@ -1,6 +1,5 @@
 from django.contrib import admin  # Django admin site registration helpers
 from django.contrib import messages as django_messages  # message helper for admin user feedback
-from django.db.models import F  # F expressions for atomic updates
 from datetime import date, timedelta  # date helpers for issue/return dates
 
 from .models import Student, Genre, Book, Issue, Return, ContactForm, ReturnRequest  # local app models
@@ -18,13 +17,8 @@ class IssueAdmin(admin.ModelAdmin):
 
     def approve_pickup(self, request, queryset):
         processed = 0
-        skipped = 0
-        for issue in queryset.filter(pickup_ready=True).select_related('book_id'):
-            # Try to reserve a copy atomically using an F() update to avoid race conditions
-            updated = Book.objects.filter(pk=issue.book_id.pk, book_copies_available__gt=0).update(book_copies_available=F('book_copies_available') - 1)
-            if updated == 0:
-                skipped += 1
-                continue
+        for issue in queryset.filter(pickup_ready=True):
+            # The copy was reserved when the student submitted the issue request.
             issue.pickup_ready = False
             issue.issue_date = date.today()
             issue.overdue_date = date.today() + timedelta(days=14)
@@ -33,8 +27,6 @@ class IssueAdmin(admin.ModelAdmin):
 
         if processed:
             self.message_user(request, f"Approved pickup for {processed} issue(s).", level=django_messages.INFO)
-        if skipped:
-            self.message_user(request, f"{skipped} issue(s) could not be approved — no copies available.", level=django_messages.WARNING)
 
     approve_pickup.short_description = "Approve pickup for selected issues"
 

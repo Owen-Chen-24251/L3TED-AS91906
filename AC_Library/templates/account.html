@@ -20,7 +20,7 @@
 {% block section_middle %}
 <div style="max-width: 800px; margin: 1.5rem auto; padding: 1.5rem; background: white; 
 border-radius: 12px; 
-box-shadow: 0 12px 32px rgba(0,0,0,0.06); color: #1a2330;">
+box-shadow: 0 12px 32px rgba(0,0,0,0.06); color: #1a2330; overflow-x:auto;">
     {# messages moved to base.html to show site-wide #}
     <h3>Books currently issued</h3>
     {% if current_issues %}
@@ -39,7 +39,7 @@ box-shadow: 0 12px 32px rgba(0,0,0,0.06); color: #1a2330;">
                 <tr style="border-bottom:1px solid #f6f6f6;">
                     <td><a href="{% url 'book_detail' item.book.book_id %}">{{ item.book.book_title }}</a></td>
                     <td>{{ item.issue_date }}</td>
-                    <td>{{ item.overdue_date }}</td>
+                    <td>{{ item.overdue_date|default:"Not started" }}</td>
                     <td>
                         {% if item.return_pending %}
                             <span style="color:#b00020;">Pending return</span>

@@ -2,6 +2,61 @@
 {% load static %}
 
 {% block section_top %}
+<style>
+.about-content {
+    max-width: 860px;
+    margin: 0 auto;
+}
+.about-content h2 {
+    margin: 0 0 28px;
+}
+.about-content h3 {
+    margin: 24px 0 8px;
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+.about-content h4 {
+    margin: 8px 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+.about-content p {
+    margin: 0 0 14px;
+    line-height: 1.7;
+}
+.about-content .motto-copy {
+    margin-bottom: 10px;
+}
+.values-list {
+    margin: 12px 0 0;
+    padding-left: 24px;
+    line-height: 1.8;
+}
+.values-list li {
+    padding-left: 6px;
+}
+.contact-card {
+    max-width: 560px;
+    margin: 0 auto;
+    background: white;
+    padding: 34px;
+    border-radius: 14px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    color: #1f1f1f;
+}
+.contact-card h2 {
+    text-align: center;
+    color: #32174D;
+    margin: 0 0 8px;
+}
+.contact-card .contact-intro {
+    text-align: center;
+    margin: 0 0 24px;
+    color: #555;
+}
+</style>
+
+<div class="about-content">
 <h2>About Our School</h2>
 <h3>Our History</h3>
 <p>Alfriston College opened for learners in January 2004 with a vision to meet the diverse 
@@ -16,43 +71,32 @@
 <h3>Our Motto</h3>
 <h4>"Te Ihi Ki Te Ako"</h4>
 <h4>Zest for Learning</h4>
-<p>The Alfriston College motto is intended to highlight the thrill, joy, 
+<p class="motto-copy">The Alfriston College motto is intended to highlight the thrill, joy, 
     excitement and spirit of learning. Learning experiences, in and out of 
-    learning spaces, should be connected, authentic and relevant. Learners 
-    should see purpose in what they learn and leave school with the capabilities 
+    learning spaces, should be connected, authentic and relevant.</p>
+<p>Learners should see purpose in what they learn and leave school with the capabilities 
     to be self-reliant, self-motivated and life-long independent learners.</p>
+</div>
 {% endblock %}
 
 {% block section_middle %}
+<div class="about-content">
 <h2>Our Library Staff & Values</h2>
 <p>Kei a au te turanga, kei a au te ako, kei a au te tutuki!</p>
 <p>I belong, I learn, I succeed!</p>
 <p>The life-long values we encourage, model and explore through our Whaanau and learning programmes are:</p>
-<p>Whakapapa – Connection</p>
-<p>Ahuatanga – Character</p>
-<p>Tuu Maia – Confidence</p>
-<p>Maatau – Competence</p>
+<ul class="values-list">
+    <li><strong>Whakapapa</strong> - Connection</li>
+    <li><strong>Ahuatanga</strong> - Character</li>
+    <li><strong>Tuu Maia</strong> - Confidence</li>
+    <li><strong>Maatau</strong> - Competence</li>
+</ul>
+</div>
 {% endblock %}
 
 {% block section_bottom %}
 <style>
-.contact-card {
-    max-width: 560px;
-    margin: 40px auto;
-    background: white;
-    padding: 34px;
-    border-radius: 14px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-    color: #1f1f1f;
-}
-.contact-card h2 {
-    text-align: center;
-    color: #32174D;
-    margin-bottom: 8px;
-}
 .contact-card p {
-    text-align: center;
-    margin-bottom: 24px;
     color: #555;
 }
 .contact-card label {
@@ -100,7 +144,7 @@
 
 <div class="contact-card">
     <h2>Contact Us</h2>
-    <p>Please contact our team of librarians for any enquiries. We will get in touch soon.</p>
+    <p class="contact-intro">Have a question? We're here to help, and our librarians will be in touch soon.</p>
     <form method="POST">
         {% csrf_token %}
         <label for="id_first_name">First Name</label>

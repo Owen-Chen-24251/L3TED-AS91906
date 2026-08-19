@@ -2,7 +2,6 @@
 from django.db import models  # Django ORM models base
 from django.core.exceptions import ValidationError  # raised for model validation errors
 from django.db import transaction  # database transaction helpers
-from django.db.models import F  # F expressions for atomic DB updates
 from datetime import date, datetime, timedelta  # date utilities used across models
 from decimal import Decimal as decimal  # Decimal type for monetary/fine calculations
 
@@ -95,7 +94,7 @@ class Issue(models.Model):  # model representing a book issue (loan)
     book_id = models.ForeignKey(Book, on_delete=models.CASCADE, null=True) # Only uses books that are available in Book class.
     student_id = models.ForeignKey(Student, on_delete=models.CASCADE, null=True) # Only uses students that are available in Student class.
     issue_date = models.DateField(auto_now_add=True) # Automatically sets the date when a book is issued.
-    overdue_date = models.DateField(default=calculate_overdue_date) # Stores the date when a book is overdue.
+    overdue_date = models.DateField(default=None, null=True, blank=True) # Starts when pickup is approved.
     pickup_ready = models.BooleanField(default=False) # Librarian changes this from True to False when the student has picked up the book.
 
     def clean(self): # Clean function to validate the data before saving it to the database.
@@ -103,38 +102,10 @@ class Issue(models.Model):  # model representing a book issue (loan)
             raise ValidationError("Please select a book to issue.") # Error message for book selection.
         if self.student_id is None: # Checks if a student has been selected for issue.
             raise ValidationError("Please select a student to issue.") # Error message for student selection.
-        # Note: do NOT modify related book counts during validation. Pickup approval
-        # is handled by staff in the admin and will decrement the available copy
-        # count at the time the student actually picks up the book.
+        # Book copies are reserved when the student submits the issue request.
 
     def __str__(self): # Returns the student, issued book, and issue date when data is validated and saved.
         return f"{self.student_id} issued {self.book_id.book_title} on {self.issue_date}" # Return message for student, issued book, and issue date.
-
-    def save(self, *args, **kwargs):
-        # If this is an update where pickup_ready transitions True -> False,
-        # this indicates the book was picked up; attempt to decrement copies
-        # atomically at that time.
-        if self.pk:  # if PK exists this is an update, try to fetch original
-            try:
-                orig = Issue.objects.get(pk=self.pk)
-            except Issue.DoesNotExist:
-                orig = None  # original record not found (concurrent delete or new)
-        else:
-            orig = None
-
-        # Normal save path for new Issues or updates that don't change pickup state
-        if not orig or not (orig.pickup_ready and not self.pickup_ready):
-            super().save(*args, **kwargs)
-            return
-
-        # orig.pickup_ready == True and self.pickup_ready == False => approve pickup
-        with transaction.atomic():
-            # Attempt to decrement the book copy count in the DB atomically
-            updated = Book.objects.filter(pk=self.book_id.pk, book_copies_available__gt=0).update(book_copies_available=F('book_copies_available') - 1)
-            if updated == 0:
-                raise ValidationError("No copies available to fulfill this pickup.")
-            # persist the issue changes (issue_date/overdue_date set by admin)
-            super().save(*args, **kwargs)
 
 # Return model to store information about book returns in the library.
 class Return(models.Model):  # model representing a returned book
@@ -145,16 +116,18 @@ class Return(models.Model):  # model representing a returned book
     def clean(self): # Clean function to validate the data before saving it to the database.
         if self.issue_id is None: # Checks if an issue has been selected for return.
             raise ValidationError("Please select an issue to return.") # Error message for issue selection.
+        if self.issue_id.pickup_ready:
+            raise ValidationError("This book has not been picked up yet.")
         if self.return_date < self.issue_id.issue_date: # Checks if the return date is before the issue date.
             raise ValidationError("Return date cannot be before the issue date.") # Error message.
         
     def calculate_days_overdue(self):
-        if self.return_date > self.issue_id.overdue_date: # Checks if the return date is after the overdue date.
+        if self.issue_id.overdue_date and self.return_date > self.issue_id.overdue_date: # Checks if the return date is after the overdue date.
             return (self.return_date - self.issue_id.overdue_date).days # Calculates the number of days overdue.
         return 0 # If the book is not overdue, returns 0 days overdue.
             
     def save(self, *args, **kwargs): # Save function to calculate the overdue fine and update the book copies when a book is returned.
-        if self.return_date > self.issue_id.overdue_date: # Checks if the return date is after the overdue date.
+        if self.issue_id.overdue_date and self.return_date > self.issue_id.overdue_date: # Checks if the return date is after the overdue date.
             days_overdue = self.calculate_days_overdue() # Calculate the number of days overdue.
             penalty_fee = decimal("10.00") # Base fine for overdue books.
             overdue_fines = penalty_fee + (days_overdue * decimal("0.50")) # Calculates the fine amount for overdue books. ($10.00 plus $0.50 for each day overdue)

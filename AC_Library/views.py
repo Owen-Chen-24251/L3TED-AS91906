@@ -8,6 +8,7 @@ from django.urls import reverse  # reverse URL names to paths
 from django.contrib.auth.hashers import check_password, make_password  # password hashing helpers
 from django.contrib import messages  # Django messages framework for flash alerts
 from django.core.exceptions import ValidationError  # validation exception
+from django.db import transaction  # database transaction helpers
 from .forms import ContactForm  # local form for contact page
 from .models import Book, Genre, Student, Issue, Return, ReturnRequest  # app models
 
@@ -256,10 +257,10 @@ def account(request):  # student account dashboard showing loans and history
             past_returns.append(entry)  # add to returned history
         else:
             # compute days until due (negative if overdue)
-            days_until_due = (issue.overdue_date - today).days
+            days_until_due = (issue.overdue_date - today).days if issue.overdue_date else None
             entry['days_until_due'] = days_until_due
-            entry['is_overdue'] = days_until_due < 0
-            entry['days_overdue'] = abs(days_until_due) if days_until_due < 0 else 0
+            entry['is_overdue'] = days_until_due is not None and days_until_due < 0
+            entry['days_overdue'] = abs(days_until_due) if days_until_due is not None and days_until_due < 0 else 0
             entry['return_pending'] = bool(pending_request)  # is a return requested?
             entry['pickup_ready'] = bool(issue.pickup_ready)  # waiting for librarian pickup?
             current_issues.append(entry)
@@ -287,18 +288,23 @@ def issue_book(request):  # page where students request to issue a book
 
     if request.method == 'POST':
         book_id = request.POST.get('book_id')
-        selected_book = available_books.filter(book_id=book_id).first()  # validate selection
-
-        if not selected_book:
-            messages.error(request, 'That book is not available to issue right now.')
-            return redirect('issue')
-
-        issue = Issue(book_id=selected_book, student_id=student)  # create Issue object
-        # mark as ready for pickup so librarian/staff know it's waiting
-        issue.pickup_ready = True
         try:
-            issue.full_clean()  # run model validation
-            issue.save()  # persist request (pickup approval happens in admin)
+            with transaction.atomic():
+                # Lock the book row so simultaneous requests cannot reserve the same copy.
+                selected_book = Book.objects.select_for_update().filter(
+                    book_id=book_id,
+                    book_copies_available__gt=0,
+                ).first()
+                if not selected_book:
+                    messages.error(request, 'That book is not available to issue right now.')
+                    return redirect('issue')
+
+                selected_book.book_copies_available -= 1
+                selected_book.save(update_fields=['book_copies_available'])
+
+                issue = Issue(book_id=selected_book, student_id=student, pickup_ready=True)
+                issue.full_clean()  # run model validation
+                issue.save()  # persist request; approval starts the due date
             messages.success(request, f'You have successfully issued {selected_book.book_title}. It is available for pickup in the library.')
             return redirect('account')
         except ValidationError as e:

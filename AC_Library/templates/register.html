@@ -6,12 +6,13 @@
 
 <style>
 .register-container{
-    width:500px;
-    margin:50px auto;
+    width:min(500px, 100%);
+    margin:24px auto;
     background:white;
     padding:40px;
     border-radius:12px;
     box-shadow:0 0 15px rgba(0,0,0,0.2);
+    overflow-wrap:break-word;
 }
 .register-container h1{
     text-align:center;
@@ -31,6 +32,26 @@
     border:1px solid #aaa;
     border-radius:6px;
     font-size:16px;
+}
+.password-field{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:8px;
+}
+.password-field input{
+    margin-top:0;
+}
+.password-toggle{
+    flex:0 0 auto;
+    width:auto !important;
+    margin:0 !important;
+    padding:10px 12px !important;
+    background:#eee !important;
+    color:#32174D !important;
+    border:1px solid #aaa !important;
+    border-radius:6px !important;
+    font-size:14px !important;
 }
 .register-container input:focus{
     outline:none;
@@ -101,10 +122,16 @@ required>
 <input type="email" id="email" name="school_email" value="{{ school_email|default:'' }}" 
 placeholder="student@ac.school.nz" required>
 <label for="password"> Password </label>
+<div class="password-field">
 <input type="password" id="password" name="password" required>
+<button type="button" class="password-toggle" data-password-target="password" aria-label="Show password">Show</button>
+</div>
 
 <label for="confirm_password"> Confirm Password </label>
-<input type="password" id="confirm_password" name="confirm_password" required> 
+<div class="password-field">
+<input type="password" id="confirm_password" name="confirm_password" required>
+<button type="button" class="password-toggle" data-password-target="confirm_password" aria-label="Show confirmed password">Show</button>
+</div>
 
 <button type="submit">Register</button>
 </form>
@@ -115,4 +142,15 @@ Already have an account?
 
 </div>
 </div>
+<script>
+document.querySelectorAll('.password-toggle').forEach(function (button) {
+    button.addEventListener('click', function () {
+        const passwordInput = document.getElementById(button.dataset.passwordTarget);
+        const isHidden = passwordInput.type === 'password';
+        passwordInput.type = isHidden ? 'text' : 'password';
+        button.textContent = isHidden ? 'Hide' : 'Show';
+        button.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+    });
+});
+</script>
 {% endblock %}
