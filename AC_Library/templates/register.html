@@ -1,9 +1,12 @@
 {% extends "base.html" %}
 
-
 {% block section_top %}
+<h2>Student Registeration</h2>
+<p>Sign up using your school email to access the library system.</p>
+<p><strong>New here?</strong> Sign into your library account by clicking Login after registering.</p>
+{% endblock %}
 
-
+{% block section_middle %}
 <style>
 .register-container{
     width:min(500px, 100%);
@@ -85,13 +88,26 @@
 }
 .login-link{
     text-align:center;
-    margin-top:20px;
+    margin-top:22px;
 }
-.login-link a{
-    color:#32174D;
-    font-weight:bold;
-    text-decoration:none;
-}
+    .login-link p{
+        margin:0 0 10px;
+        color:#444;
+        font-size:0.95rem;
+    }
+    .login-link a{
+        display:inline-block;
+        padding:10px 18px;
+        background:#32174D;
+        color:#fff;
+        font-weight:700;
+        border-radius:999px;
+        text-decoration:none;
+        transition:background 0.2s ease;
+    }
+    .login-link a:hover{
+        background:#512b81;
+    }
 </style>
 
 <div class="register-container">
@@ -137,8 +153,8 @@ placeholder="student@ac.school.nz" required>
 </form>
 
 <div class="login-link">
-Already have an account?
-<a href="{% url 'login' %}"> Login here </a>
+<p>Already have an account?</p>
+<a href="{% url 'login' %}">Login here</a>
 
 </div>
 </div>
